@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.26730.15
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LoveLetter", "LoveLetter.csproj", "{3D11AA37-FC91-BE55-A929-FACD67AE1375}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LoveLetter.Editor", "LoveLetter.Editor.csproj", "{CA82CAB5-DF7E-94BD-F08D-D58A7E97ED1F}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{3D11AA37-FC91-BE55-A929-FACD67AE1375}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3D11AA37-FC91-BE55-A929-FACD67AE1375}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3D11AA37-FC91-BE55-A929-FACD67AE1375}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3D11AA37-FC91-BE55-A929-FACD67AE1375}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CA82CAB5-DF7E-94BD-F08D-D58A7E97ED1F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CA82CAB5-DF7E-94BD-F08D-D58A7E97ED1F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CA82CAB5-DF7E-94BD-F08D-D58A7E97ED1F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CA82CAB5-DF7E-94BD-F08D-D58A7E97ED1F}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {EAEBB03F-3F49-4B05-B8FE-95E3326100D9}
+	EndGlobalSection
+EndGlobal
