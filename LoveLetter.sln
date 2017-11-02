@@ -1,8 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.26730.15
-MinimumVisualStudioVersion = 10.0.40219.1
+# Visual Studio 2017
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LoveLetter", "LoveLetter.csproj", "{3D11AA37-FC91-BE55-A929-FACD67AE1375}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LoveLetter.Editor", "LoveLetter.Editor.csproj", "{CA82CAB5-DF7E-94BD-F08D-D58A7E97ED1F}"
@@ -24,8 +22,5 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
-	EndGlobalSection
-	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {EAEBB03F-3F49-4B05-B8FE-95E3326100D9}
 	EndGlobalSection
 EndGlobal
