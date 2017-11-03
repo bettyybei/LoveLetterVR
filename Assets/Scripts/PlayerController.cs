@@ -8,17 +8,21 @@ public class PlayerController : MonoBehaviour, IGlobalTriggerPressDownHandler {
 
     public enum State { Dead, Guard, Priest, Baron, Handmaid, Prince, King, Countess, Princess }
 
+	//TextMesh textObject;
+	public bool isDoingTurn = false;
+
+	bool isChoosingOtherPlayer = false;
     bool immune = false;
     PlayerController chosenOtherPlayer;
 
     State current;
     State dismiss;
 
-    bool isChoosingOtherPlayer = false;
+
 
 	// Use this for initialization
 	void Start () {
-	
+		
 	}
 	
 	// Update is called once per frame
@@ -27,8 +31,15 @@ public class PlayerController : MonoBehaviour, IGlobalTriggerPressDownHandler {
 	}
 
     #region General Player Methods
-    void StartTurn(State next)
+	public void SetState(State s) {
+		current = s;
+		TextMesh textObject = GameObject.Find("StateText").GetComponent<TextMesh>();
+		textObject.text = s.ToString();
+	}
+
+    public void StartTurn(State next)
     {
+		Debug.Log ("start turn");
         dismiss = next;
         if (next == State.Countess && (current == State.Prince || current == State.King) )
         {
@@ -39,6 +50,7 @@ public class PlayerController : MonoBehaviour, IGlobalTriggerPressDownHandler {
             ChooseStateToDismiss();
             Dismiss();
         }
+		isDoingTurn = false;
     }
 
     void Dismiss()
@@ -72,20 +84,20 @@ public class PlayerController : MonoBehaviour, IGlobalTriggerPressDownHandler {
         }
     }
 
-    State ChooseStateToDismiss()
+    void ChooseStateToDismiss()
     {
         if (true) //TODO
         {
-            return current;
+			return;;
         }
         State temp = current;
-        current = dismiss;
+		SetState(dismiss);
         dismiss = temp;
     }
 
     State ChooseOtherPlayerState()
     {
-        return State.Dead;
+        return State.Guard;
     }
 
     void Die()
@@ -98,29 +110,38 @@ public class PlayerController : MonoBehaviour, IGlobalTriggerPressDownHandler {
     #region Dismissal Actions
     void GuardAttack(State guess)
     {
-        chosenOtherPlayer = null;
-        isChoosingOtherPlayer = true;
-        while (chosenOtherPlayer != null)
-        {
-            //wait for player to choose other player
-        }
-        isChoosingOtherPlayer = false;
-        if (chosenOtherPlayer.current == guess)
-        {
-            //success
-            chosenOtherPlayer.Die();
-        }
-        else
-        {
-            //fail
-        }
+		Debug.Log ("guard attaack");
+		StartCoroutine (ChooseOtherPlayer (guess));
     }
+
+	IEnumerator ChooseOtherPlayer(State guess) {
+		chosenOtherPlayer = null;
+		isChoosingOtherPlayer = true;
+		while (chosenOtherPlayer == null)
+		{
+			Debug.Log (gameObject.name + "; loop; " + (chosenOtherPlayer == null));
+			//wait for player to choose other player
+			yield return new WaitForSeconds(1);
+		}
+		isChoosingOtherPlayer = false;
+		if (chosenOtherPlayer.current == guess)
+		{
+			//success
+			Debug.Log ("success");
+			chosenOtherPlayer.Die();
+		}
+		else
+		{
+			//fail
+		}
+		Debug.Log ("silent failure");
+	}
 
     void PriestReveal()
     {
         chosenOtherPlayer = null;
         isChoosingOtherPlayer = true;
-        while (chosenOtherPlayer != null)
+        while (chosenOtherPlayer == null)
         {
             //wait for player to choose other player
         }
@@ -132,7 +153,7 @@ public class PlayerController : MonoBehaviour, IGlobalTriggerPressDownHandler {
     {
         chosenOtherPlayer = null;
         isChoosingOtherPlayer = true;
-        while (chosenOtherPlayer != null)
+        while (chosenOtherPlayer == null)
         {
             //wait for player to choose other player
         }
@@ -157,7 +178,7 @@ public class PlayerController : MonoBehaviour, IGlobalTriggerPressDownHandler {
     {
         chosenOtherPlayer = null;
         isChoosingOtherPlayer = true;
-        while (chosenOtherPlayer != null)
+        while (chosenOtherPlayer == null)
         {
             //wait for player to choose other player
         }
@@ -169,7 +190,7 @@ public class PlayerController : MonoBehaviour, IGlobalTriggerPressDownHandler {
     {
         chosenOtherPlayer = null;
         isChoosingOtherPlayer = true;
-        while (chosenOtherPlayer != null)
+        while (chosenOtherPlayer == null)
         {
             //wait for player to choose other player
         }
@@ -181,13 +202,13 @@ public class PlayerController : MonoBehaviour, IGlobalTriggerPressDownHandler {
     #endregion
 
     #region Vive Controller Methods
-    void IGlobalTriggerPressDownHandler.OnGlobalTriggerPressDown(VREventData eventData)
+    public void OnGlobalTriggerPressDown(VREventData eventData)
     {
+		Debug.Log ("here");
         PlayerController otherPlayerController = eventData.currentRaycast.GetComponent<PlayerController>();
         if (isChoosingOtherPlayer == true && otherPlayerController != null)
         {
             chosenOtherPlayer = otherPlayerController;
-            //We're pointing at a PlayerController! Do something.
         } else
         {
             //We're not pointing at a PlayerController.

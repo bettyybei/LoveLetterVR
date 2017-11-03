@@ -3,3 +3,6 @@ Assets/InputSystems-master.meta
 Assets/SteamVR/
 Assets/SteamVR.meta
 .vs/
+Library/
+Temp/
+/*.csproj
