@@ -112,7 +112,7 @@ public class PlayerController : MonoBehaviour, IGlobalTriggerPressDownHandler {
         }
         else
         {
-            //better luck next time
+            //fail
         }
     }
 
