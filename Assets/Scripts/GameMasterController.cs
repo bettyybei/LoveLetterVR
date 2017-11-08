@@ -32,14 +32,15 @@ public class GameMasterController : MonoBehaviour {
 		players.Enqueue (player1);
 		players.Enqueue (player2);
 		//deck = ShuffleDeck(deck);
-		Debug.Log(nextStateIdx + " " + players.Count);
 		while (nextStateIdx <= players.Count) {
 			PlayerController player = players.Dequeue();
+			Debug.Log (player);
 			player.SetState(deck[nextStateIdx++]);
 			players.Enqueue(player);
-			Debug.Log ("loop1");
 		}
 		currentPlayer = players.Dequeue();
+		currentPlayer.isDoingTurn = true;
+		currentPlayer.StartTurn(deck[nextStateIdx++]);
 	}
 	
 	// Update is called once per frame

@@ -8,38 +8,42 @@ public class PlayerController : MonoBehaviour, IGlobalTriggerPressDownHandler {
 
     public enum State { Dead, Guard, Priest, Baron, Handmaid, Prince, King, Countess, Princess }
 
-	//TextMesh textObject;
+	public GameObject pointerObject;
+	private Renderer r;
+	public TextMesh textObject;
 	public bool isDoingTurn = false;
 
 	bool isChoosingOtherPlayer = false;
-    bool immune = false;
+	bool immune = false;
     PlayerController chosenOtherPlayer;
 
     State current;
     State dismiss;
 
-
-
 	// Use this for initialization
 	void Start () {
-		
+		r = pointerObject.GetComponent<Renderer> ();
 	}
-	
+
 	// Update is called once per frame
 	void Update () {
-		
+		//Renderer r = pointerObject.GetComponent<Renderer> ();
+		if (r.enabled != isChoosingOtherPlayer)
+			Debug.Log (this + " toggle pointer to " + isChoosingOtherPlayer);
+			r.enabled = isChoosingOtherPlayer;
 	}
 
     #region General Player Methods
 	public void SetState(State s) {
 		current = s;
-		TextMesh textObject = GameObject.Find("StateText").GetComponent<TextMesh>();
 		textObject.text = s.ToString();
 	}
 
     public void StartTurn(State next)
     {
-		Debug.Log ("start turn");
+		Debug.Log (this + " turn");
+		if (immune == true) immune = false;
+
         dismiss = next;
         if (next == State.Countess && (current == State.Prince || current == State.King) )
         {
@@ -50,31 +54,30 @@ public class PlayerController : MonoBehaviour, IGlobalTriggerPressDownHandler {
             ChooseStateToDismiss();
             Dismiss();
         }
-		isDoingTurn = false;
     }
 
     void Dismiss()
     {
         switch (dismiss)
         {
-            case State.Guard:
-                State guess = ChooseOtherPlayerState();
-                GuardAttack(guess);
+			case State.Guard:
+				State guess = ChooseOtherPlayerState ();
+				StartCoroutine(GuardAttack(guess));
                 break;
-            case State.Priest:
-                PriestReveal();
+			case State.Priest:
+				StartCoroutine(PriestReveal());
                 break;
             case State.Baron:
-                BaronBattle();
+				StartCoroutine(BaronBattle());
                 break;
             case State.Handmaid:
                 immune = true;
                 break;
             case State.Prince:
-                PrinceForceDiscard();
+				StartCoroutine(PrinceForceDiscard());
                 break;
             case State.King:
-                KingTradeHands();
+				StartCoroutine(KingTradeHands());
                 break;
             case State.Countess:
                 break;
@@ -88,7 +91,7 @@ public class PlayerController : MonoBehaviour, IGlobalTriggerPressDownHandler {
     {
         if (true) //TODO
         {
-			return;;
+			return;
         }
         State temp = current;
 		SetState(dismiss);
@@ -108,54 +111,53 @@ public class PlayerController : MonoBehaviour, IGlobalTriggerPressDownHandler {
 
 
     #region Dismissal Actions
-    void GuardAttack(State guess)
-    {
-		Debug.Log ("guard attaack");
-		StartCoroutine (ChooseOtherPlayer (guess));
-    }
 
-	IEnumerator ChooseOtherPlayer(State guess) {
+	IEnumerator GuardAttack(State guess) {
 		chosenOtherPlayer = null;
 		isChoosingOtherPlayer = true;
+		Debug.Log ("guard attack");
 		while (chosenOtherPlayer == null)
 		{
-			Debug.Log (gameObject.name + "; loop; " + (chosenOtherPlayer == null));
 			//wait for player to choose other player
-			yield return new WaitForSeconds(1);
+			yield return null;
 		}
 		isChoosingOtherPlayer = false;
 		if (chosenOtherPlayer.current == guess)
 		{
 			//success
-			Debug.Log ("success");
 			chosenOtherPlayer.Die();
+			Debug.Log ("Die reached");
 		}
 		else
 		{
 			//fail
 		}
-		Debug.Log ("silent failure");
+		isDoingTurn = false;
+		Debug.Log ("end of function call");
 	}
 
-    void PriestReveal()
+    IEnumerator PriestReveal()
     {
         chosenOtherPlayer = null;
         isChoosingOtherPlayer = true;
         while (chosenOtherPlayer == null)
         {
             //wait for player to choose other player
+			yield return null;
         }
         isChoosingOtherPlayer = false;
-        //Reveal other player
+		//Reveal other player
+		isDoingTurn = false;
     }
 
-    void BaronBattle()
+	IEnumerator BaronBattle()
     {
         chosenOtherPlayer = null;
         isChoosingOtherPlayer = true;
         while (chosenOtherPlayer == null)
         {
             //wait for player to choose other player
+			yield return null;
         }
         isChoosingOtherPlayer = false;
         if (chosenOtherPlayer.current < current)
@@ -171,47 +173,52 @@ public class PlayerController : MonoBehaviour, IGlobalTriggerPressDownHandler {
         else
         {
             //tie
-        }
+		}
+		isDoingTurn = false;
     }
 
-    void PrinceForceDiscard()
+	IEnumerator PrinceForceDiscard()
     {
         chosenOtherPlayer = null;
         isChoosingOtherPlayer = true;
         while (chosenOtherPlayer == null)
         {
             //wait for player to choose other player
+			yield return null;
         }
         isChoosingOtherPlayer = false;
-        // new state for other player
+		// new state for other player
+		isDoingTurn = false;
     }
 
-    void KingTradeHands()
+	IEnumerator KingTradeHands()
     {
         chosenOtherPlayer = null;
         isChoosingOtherPlayer = true;
         while (chosenOtherPlayer == null)
         {
             //wait for player to choose other player
+			yield return null;
         }
         isChoosingOtherPlayer = false;
         State temp = current;
         current = chosenOtherPlayer.current;
-        chosenOtherPlayer.current = temp;
+		chosenOtherPlayer.current = temp;
+		isDoingTurn = false;
     }
     #endregion
 
     #region Vive Controller Methods
     public void OnGlobalTriggerPressDown(VREventData eventData)
     {
-		Debug.Log ("here");
+		if (eventData.currentRaycast == null)
+			return;
+		
         PlayerController otherPlayerController = eventData.currentRaycast.GetComponent<PlayerController>();
-        if (isChoosingOtherPlayer == true && otherPlayerController != null)
+		Debug.Log ("Pointing at " + otherPlayerController);
+		if (isChoosingOtherPlayer == true && otherPlayerController != null && otherPlayerController != this && !otherPlayerController.immune)
         {
             chosenOtherPlayer = otherPlayerController;
-        } else
-        {
-            //We're not pointing at a PlayerController.
         }
     }
     #endregion

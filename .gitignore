@@ -6,3 +6,4 @@ Assets/SteamVR.meta
 Library/
 Temp/
 /*.csproj
+obj/
