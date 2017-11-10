@@ -1,4 +1,0 @@
-sceneSetups:
-- path: Assets/tmp.unity
-  isLoaded: 0
-  isActive: 0

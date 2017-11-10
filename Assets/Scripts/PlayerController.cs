@@ -2,35 +2,39 @@
 using System.Collections.Generic;
 using UnityEngine;
 using FRL.IO;
+using State = GameMaster.State;
 [RequireComponent(typeof(Receiver))]
 
 public class PlayerController : MonoBehaviour, IGlobalTriggerPressDownHandler {
 
-    public enum State { Dead, Guard, Priest, Baron, Handmaid, Prince, King, Countess, Princess }
-
 	public GameObject pointerObject;
-	private Renderer r;
+	private Renderer pointerRenderer;
 	public TextMesh textObject;
-	public bool isDoingTurn = false;
+	bool isDoingTurn = false;
 
 	bool isChoosingOtherPlayer = false;
+	bool isChoosingOwnState = false;
+	bool isChoosingMenuState = false;
+
 	bool immune = false;
     PlayerController chosenOtherPlayer;
+	StateController chosenStateController;
 
-    State current;
+    public State current;
     State dismiss;
 
 	// Use this for initialization
 	void Start () {
-		r = pointerObject.GetComponent<Renderer> ();
+		pointerRenderer = pointerObject.GetComponent<Renderer> ();
 	}
 
 	// Update is called once per frame
 	void Update () {
 		//Renderer r = pointerObject.GetComponent<Renderer> ();
-		if (r.enabled != isChoosingOtherPlayer)
-			Debug.Log (this + " toggle pointer to " + isChoosingOtherPlayer);
-			r.enabled = isChoosingOtherPlayer;
+		bool pointerEnabled = isChoosingOtherPlayer || isChoosingOwnState || isChoosingMenuState;
+		if (pointerRenderer.enabled != pointerEnabled)
+			Debug.Log (this + " toggle pointer to " + pointerEnabled);
+			pointerRenderer.enabled = pointerEnabled;
 	}
 
     #region General Player Methods
@@ -43,26 +47,26 @@ public class PlayerController : MonoBehaviour, IGlobalTriggerPressDownHandler {
     {
 		Debug.Log (this + " turn");
 		if (immune == true) immune = false;
-
-        dismiss = next;
-        if (next == State.Countess && (current == State.Prince || current == State.King) )
-        {
-            Dismiss();
-        }
-        else
-        {
-            ChooseStateToDismiss();
-            Dismiss();
-        }
+		dismiss = next;
+		StartCoroutine (Dismiss ());
     }
 
-    void Dismiss()
+    IEnumerator Dismiss()
     {
+		if (dismiss == State.Countess && (current == State.Prince || current == State.King) )
+		{
+			// Skip choosing state to dismiss
+		}
+		else
+		{
+			yield return StartCoroutine(ChooseStateToDismiss());
+		}
+
         switch (dismiss)
         {
 			case State.Guard:
-				State guess = ChooseOtherPlayerState ();
-				StartCoroutine(GuardAttack(guess));
+				yield return StartCoroutine (ChooseOtherPlayerState ());
+				StartCoroutine(GuardAttack());
                 break;
 			case State.Priest:
 				StartCoroutine(PriestReveal());
@@ -87,20 +91,32 @@ public class PlayerController : MonoBehaviour, IGlobalTriggerPressDownHandler {
         }
     }
 
-    void ChooseStateToDismiss()
+    IEnumerator ChooseStateToDismiss()
     {
-        if (true) //TODO
+		chosenStateController = null;
+		isChoosingOwnState = true;
+		while (chosenStateController == null) {
+			// wait for player to choose state to dismiss
+			yield return null;
+		}
+		isChoosingOwnState = false;
+		if (chosenStateController.GetState() == current) // If they want to dismiss their current/prev state
         {
-			return;
+			State temp = current;
+			SetState(dismiss);
+			dismiss = temp;
         }
-        State temp = current;
-		SetState(dismiss);
-        dismiss = temp;
     }
 
-    State ChooseOtherPlayerState()
+    IEnumerator ChooseOtherPlayerState()
     {
-        return State.Guard;
+		chosenStateController = null;
+		isChoosingMenuState = true;
+		while (chosenStateController == null) {
+			// wait for player to choose state from menu
+			yield return null;
+		}
+		isChoosingMenuState = false;
     }
 
     void Die()
@@ -112,10 +128,23 @@ public class PlayerController : MonoBehaviour, IGlobalTriggerPressDownHandler {
 
     #region Dismissal Actions
 
-	IEnumerator GuardAttack(State guess) {
+	IEnumerator GuardAttack() {
+		// Choose state first
+		/*chosenStateController = null;
+		isChoosingMenuState = true;
+		while (chosenStateController == null) {
+			// wait for player to choose state from menu
+			yield return null;
+		}
+		isChoosingMenuState = false;
+		Debug.Log ("end coroutine choose other player state");
+		*/
+
+		State guess = chosenStateController.GetState();
+
 		chosenOtherPlayer = null;
 		isChoosingOtherPlayer = true;
-		Debug.Log ("guard attack");
+		Debug.Log ("guard attack with guess: " + guess);
 		while (chosenOtherPlayer == null)
 		{
 			//wait for player to choose other player
@@ -126,7 +155,7 @@ public class PlayerController : MonoBehaviour, IGlobalTriggerPressDownHandler {
 		{
 			//success
 			chosenOtherPlayer.Die();
-			Debug.Log ("Die reached");
+			Debug.Log ("Other player died");
 		}
 		else
 		{
@@ -208,18 +237,40 @@ public class PlayerController : MonoBehaviour, IGlobalTriggerPressDownHandler {
     }
     #endregion
 
+	#region Public Getters and Setters
+	public State GetCurrentState() {
+		return this.current;
+	}
+	public bool GetIsDoingTurn() {
+		return this.isDoingTurn;
+	}
+	public void SetIsDoingTurn(bool b) {
+		this.isDoingTurn = b;
+	}
+	public bool GetIsChoosingOwnState() {
+		return this.isChoosingOwnState;
+	}
+	public bool GetIsChoosingMenuState() {
+		return this.isChoosingMenuState;
+	}
+
+	#endregion
+
     #region Vive Controller Methods
     public void OnGlobalTriggerPressDown(VREventData eventData)
     {
 		if (eventData.currentRaycast == null)
 			return;
-		
-        PlayerController otherPlayerController = eventData.currentRaycast.GetComponent<PlayerController>();
-		Debug.Log ("Pointing at " + otherPlayerController);
-		if (isChoosingOtherPlayer == true && otherPlayerController != null && otherPlayerController != this && !otherPlayerController.immune)
-        {
-            chosenOtherPlayer = otherPlayerController;
-        }
+
+		if (isChoosingOtherPlayer) {
+			PlayerController otherPlayerController = eventData.currentRaycast.GetComponent<PlayerController> ();
+			Debug.Log ("Pointing at " + otherPlayerController);
+			if (otherPlayerController != null && otherPlayerController != this && !otherPlayerController.immune) {
+				chosenOtherPlayer = otherPlayerController;
+			}
+		} else if (isChoosingOwnState || isChoosingMenuState) {
+			chosenStateController = eventData.currentRaycast.GetComponent<StateController> ();
+		}
     }
     #endregion
 }
