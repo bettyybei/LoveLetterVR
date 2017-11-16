@@ -8,7 +8,6 @@ using State = GameMaster.State;
 public class PlayerController : MonoBehaviour, IGlobalTriggerPressDownHandler {
 
 	public GameObject pointerObject;
-	private Renderer pointerRenderer;
 	public TextMesh textObject;
 	bool isDoingTurn = false;
 
@@ -25,16 +24,17 @@ public class PlayerController : MonoBehaviour, IGlobalTriggerPressDownHandler {
 
 	// Use this for initialization
 	void Start () {
-		pointerRenderer = pointerObject.GetComponent<Renderer> ();
+
 	}
 
 	// Update is called once per frame
 	void Update () {
-		//Renderer r = pointerObject.GetComponent<Renderer> ();
 		bool pointerEnabled = isChoosingOtherPlayer || isChoosingOwnState || isChoosingMenuState;
-		if (pointerRenderer.enabled != pointerEnabled)
-			Debug.Log (this + " toggle pointer to " + pointerEnabled);
-			pointerRenderer.enabled = pointerEnabled;
+        if (pointerEnabled != pointerObject.activeSelf)
+        {
+            Debug.Log(this + " toggle pointer to " + pointerEnabled);
+            pointerObject.SetActive(pointerEnabled);
+        }
 	}
 
     #region General Player Methods
@@ -48,7 +48,7 @@ public class PlayerController : MonoBehaviour, IGlobalTriggerPressDownHandler {
 		Debug.Log (this + " turn");
 		if (immune == true) immune = false;
 		dismiss = next;
-		StartCoroutine (Dismiss ());
+		StartCoroutine(Dismiss());
     }
 
     IEnumerator Dismiss()
@@ -65,7 +65,7 @@ public class PlayerController : MonoBehaviour, IGlobalTriggerPressDownHandler {
         switch (dismiss)
         {
 			case State.Guard:
-				yield return StartCoroutine (ChooseOtherPlayerState ());
+				yield return StartCoroutine(ChooseOtherPlayerState());
 				StartCoroutine(GuardAttack());
                 break;
 			case State.Priest:
@@ -129,17 +129,6 @@ public class PlayerController : MonoBehaviour, IGlobalTriggerPressDownHandler {
     #region Dismissal Actions
 
 	IEnumerator GuardAttack() {
-		// Choose state first
-		/*chosenStateController = null;
-		isChoosingMenuState = true;
-		while (chosenStateController == null) {
-			// wait for player to choose state from menu
-			yield return null;
-		}
-		isChoosingMenuState = false;
-		Debug.Log ("end coroutine choose other player state");
-		*/
-
 		State guess = chosenStateController.GetState();
 
 		chosenOtherPlayer = null;
@@ -263,13 +252,14 @@ public class PlayerController : MonoBehaviour, IGlobalTriggerPressDownHandler {
 			return;
 
 		if (isChoosingOtherPlayer) {
-			PlayerController otherPlayerController = eventData.currentRaycast.GetComponent<PlayerController> ();
+			PlayerController otherPlayerController = eventData.currentRaycast.GetComponent<PlayerController>();
 			Debug.Log ("Pointing at " + otherPlayerController);
 			if (otherPlayerController != null && otherPlayerController != this && !otherPlayerController.immune) {
 				chosenOtherPlayer = otherPlayerController;
 			}
-		} else if (isChoosingOwnState || isChoosingMenuState) {
-			chosenStateController = eventData.currentRaycast.GetComponent<StateController> ();
+		}
+        else if (isChoosingOwnState || isChoosingMenuState) {
+			chosenStateController = eventData.currentRaycast.GetComponent<StateController>();
 		}
     }
     #endregion

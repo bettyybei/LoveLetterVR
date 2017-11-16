@@ -60,9 +60,9 @@ public class GameMaster: MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-		if ( currentPlayer.GetIsChoosingOwnState() != twoStateMenuObject.activeSelf) {
+		if (currentPlayer.GetIsChoosingOwnState() != twoStateMenuObject.activeSelf) {
 			Debug.Log ("setting state cards to " + currentPlayer.GetIsChoosingOwnState());
-			twoStateMenuObject.SetActive (currentPlayer.GetIsChoosingOwnState ());
+			twoStateMenuObject.SetActive(currentPlayer.GetIsChoosingOwnState());
 		} else if (currentPlayer.GetIsChoosingMenuState() != stateMenuObject.activeSelf) {
 			Debug.Log ("setting state menu to " + currentPlayer.GetIsChoosingMenuState());
 			stateMenuObject.SetActive(currentPlayer.GetIsChoosingMenuState());
@@ -70,26 +70,26 @@ public class GameMaster: MonoBehaviour {
 
 		if (currentPlayerCount == 1 || nextStateIdx == 16) {
 			// game over
-		} else if (!currentPlayer.GetIsDoingTurn ()) {
-			if (currentPlayer.GetCurrentState () == State.Dead) {
+		} else if (!currentPlayer.GetIsDoingTurn()) {
+			if (currentPlayer.GetCurrentState() == State.Dead) {
 				currentPlayerCount--;
 			} else {
 				// Only put player back in queue if they didn't die this round
-				players.Enqueue (currentPlayer);
+				players.Enqueue(currentPlayer);
 				currentPlayerCount--;
 			}
-			currentPlayer = players.Dequeue ();
-			StartPlayersTurn (deck [nextStateIdx++]);
+			currentPlayer = players.Dequeue();
+			StartPlayersTurn(deck[nextStateIdx++]);
 		}
 	}
 
 	void StartPlayersTurn(State next) {
 		State previous = currentPlayer.current;
 		currentPlayer.SetIsDoingTurn(true);
-		stateCard1.SetState (previous);
-		stateCard2.SetState (next);
+		stateCard1.SetState(previous);
+		stateCard2.SetState(next);
 		Debug.Log ("Choice 1: " + previous + " Choice 2: " + next);
-		currentPlayer.StartTurn (next);
+		currentPlayer.StartTurn(next);
 	}
 
 	State[] ShuffleDeck(State[] deck) {
