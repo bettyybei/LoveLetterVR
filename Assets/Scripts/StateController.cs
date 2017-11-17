@@ -5,13 +5,16 @@ using State = GameMaster.State;
 
 public class StateController : MonoBehaviour {
 
+	private Renderer rend;
 	private State state;
 
 	// Use this for initialization
 	void Start () {
-		
+		rend = GetComponent<Renderer> ();
+		Debug.Log ("texture: " + rend.material.mainTexture);
+		rend.material.mainTextureOffset = new Vector2 (0.5f, 0.5f);
 	}
-	
+
 	// Update is called once per frame
 	void Update () {
 		

@@ -260,6 +260,7 @@ public class PlayerController : MonoBehaviour, IGlobalTriggerPressDownHandler {
 		}
         else if (isChoosingOwnState || isChoosingMenuState) {
 			chosenStateController = eventData.currentRaycast.GetComponent<StateController>();
+			Debug.Log ("Pointing at state: " + chosenStateController.GetState ());
 		}
     }
     #endregion
