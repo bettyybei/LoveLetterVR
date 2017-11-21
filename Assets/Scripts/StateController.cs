@@ -5,14 +5,13 @@ using State = GameMaster.State;
 
 public class StateController : MonoBehaviour {
 
-	private Renderer rend;
+	public bool isCardController = false;
 	private State state;
+	private Mesh mesh;
 
 	// Use this for initialization
 	void Start () {
-		rend = GetComponent<Renderer> ();
-		Debug.Log ("texture: " + rend.material.mainTexture);
-		rend.material.mainTextureOffset = new Vector2 (0.5f, 0.5f);
+		
 	}
 
 	// Update is called once per frame
@@ -22,7 +21,11 @@ public class StateController : MonoBehaviour {
 
 	public void SetState(State s) {
 		this.state = s;
-		//Debug.Log (this + " set state to " + s);
+		if (isCardController){
+			GetComponent<Renderer> ().material = Resources.Load<Material> ("Materials/Card_" + s.ToString());
+		}
+		Debug.Log (this + " set state to " + s);
+
 	}
 
 	public State GetState() {

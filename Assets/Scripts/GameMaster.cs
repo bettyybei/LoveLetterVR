@@ -19,7 +19,7 @@ public class GameMaster: MonoBehaviour {
 
 	Queue<PlayerController> players;
 	State[] deck = new State[] {
-		State.Guard, State.Guard, State.Guard, State.Guard, State.Guard, 
+		State.Guard, State.Guard, State.Guard, State.Princess, State.Guard, 
 		State.Priest, State.Priest,
 		State.Baron, State.Baron,
 		State.Handmaid, State.Handmaid,
@@ -55,41 +55,51 @@ public class GameMaster: MonoBehaviour {
 			players.Enqueue(player);
 		}
 		currentPlayer = players.Dequeue();
-		StartPlayersTurn (deck [nextStateIdx++]);
+		StartPlayersTurn (deck [nextStateIdx++], deck [nextStateIdx]);
 	}
 	
 	// Update is called once per frame
 	void Update () {
 		if (currentPlayer.GetIsChoosingOwnState() != twoStateMenuObject.activeSelf) {
-			Debug.Log ("setting state cards to " + currentPlayer.GetIsChoosingOwnState());
 			twoStateMenuObject.SetActive(currentPlayer.GetIsChoosingOwnState());
 		} else if (currentPlayer.GetIsChoosingMenuState() != stateMenuObject.activeSelf) {
-			Debug.Log ("setting state menu to " + currentPlayer.GetIsChoosingMenuState());
 			stateMenuObject.SetActive(currentPlayer.GetIsChoosingMenuState());
 		}
 
-		if (currentPlayerCount == 1 || nextStateIdx == 16) {
-			// game over
-		} else if (!currentPlayer.GetIsDoingTurn()) {
+		if (nextStateIdx == 16) {
+			//if (player1.GetCurrentState () < player2.GetCurrentState ()) {
+			//	player1.gameStatusTextObject = "You lose";
+
+		}
+		else if (!currentPlayer.GetIsDoingTurn()) {
 			if (currentPlayer.GetCurrentState() == State.Dead) {
 				currentPlayerCount--;
 			} else {
+				// Check if the player used the next card
+				if (currentPlayer.GetUsedNextState ()) {
+					nextStateIdx++;
+					currentPlayer.SetUsedNextState (false);
+				}
 				// Only put player back in queue if they didn't die this round
 				players.Enqueue(currentPlayer);
-				currentPlayerCount--;
 			}
 			currentPlayer = players.Dequeue();
-			StartPlayersTurn(deck[nextStateIdx++]);
+			if (currentPlayerCount == 1) {
+				currentPlayer.gameStatusTextObject.text = "You win!";
+			}
+			else {	
+				StartPlayersTurn (deck [nextStateIdx++], deck [nextStateIdx]);
+			}
 		}
 	}
 
-	void StartPlayersTurn(State next) {
-		State previous = currentPlayer.current;
+	void StartPlayersTurn(State next, State nextnext) {
+		State previous = currentPlayer.GetCurrentState ();
 		currentPlayer.SetIsDoingTurn(true);
 		stateCard1.SetState(previous);
 		stateCard2.SetState(next);
 		Debug.Log ("Choice 1: " + previous + " Choice 2: " + next);
-		currentPlayer.StartTurn(next);
+		currentPlayer.StartTurn(next, nextnext);
 	}
 
 	State[] ShuffleDeck(State[] deck) {
