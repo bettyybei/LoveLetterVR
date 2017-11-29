@@ -45,12 +45,12 @@ public class PlayerController : MonoBehaviour, IGlobalTriggerPressDownHandler {
 	public void SetState(State s) {
 		current = s;
 		stateTextObject.text = s.ToString();
-		Debug.Log ("State Changed to " + s);
+		Debug.Log (this + " state changed to " + s);
 	}
 
 	public void StartTurn(State next, State nextnext) //nextnext is needed for PrinceForceDiscard()
     {
-		Debug.Log (this + " turn");
+		Debug.Log (this + " starts their turn");
 		if (immune == true) immune = false;
 		dismiss = next;
 		nextState = nextnext;
@@ -74,29 +74,33 @@ public class PlayerController : MonoBehaviour, IGlobalTriggerPressDownHandler {
         {
 			case State.Guard:
 				yield return StartCoroutine(ChooseOtherPlayerState());
-				StartCoroutine(GuardAttack());
+				yield return StartCoroutine(GuardAttack());
                 break;
 			case State.Priest:
-				StartCoroutine(PriestReveal());
+				yield return StartCoroutine(PriestReveal());
                 break;
             case State.Baron:
-				StartCoroutine(BaronBattle());
+				yield return StartCoroutine(BaronBattle());
                 break;
-            case State.Handmaid:
+			case State.Handmaid:
+				gameStatusTextObject.text = "You are immune";
                 immune = true;
                 break;
 			case State.Prince:
-				StartCoroutine(PrinceForceDiscard());
+				yield return StartCoroutine(PrinceForceDiscard());
                 break;
             case State.King:
-				StartCoroutine(KingTradeHands());
+				yield return StartCoroutine(KingTradeHands());
                 break;
-            case State.Countess:
+			case State.Countess:
+				gameStatusTextObject.text = "You dismissed the Countess. No powers are enacted";
                 break;
             case State.Princess:
                 Die();
                 break;
         }
+		Debug.Log ("end of turn reached");
+		isDoingTurn = false;
     }
 
     IEnumerator ChooseStateToDismiss()
@@ -130,7 +134,8 @@ public class PlayerController : MonoBehaviour, IGlobalTriggerPressDownHandler {
 
     void Die()
     {
-        current = State.Dead;
+		gameStatusTextObject.text = "You lost!";
+		SetState (State.Dead);
     }
     #endregion
 
@@ -160,8 +165,7 @@ public class PlayerController : MonoBehaviour, IGlobalTriggerPressDownHandler {
 		{
 			//fail
 			gameStatusTextObject.text = "You guessed incorrectly. " + chosenOtherPlayer.name + " is still in the game.";
-		}
-		isDoingTurn = false;    
+		} 
 		Debug.Log ("end of function call");
 	}
 
@@ -177,7 +181,7 @@ public class PlayerController : MonoBehaviour, IGlobalTriggerPressDownHandler {
         }
         isChoosingOtherPlayer = false;
 		//Reveal other player
-		isDoingTurn = false;
+		gameStatusTextObject.text = chosenOtherPlayer.name + " has a " + chosenOtherPlayer.GetCurrentState();
     }
 
 	IEnumerator BaronBattle()
@@ -194,21 +198,20 @@ public class PlayerController : MonoBehaviour, IGlobalTriggerPressDownHandler {
 		if (chosenOtherPlayer.GetCurrentState() < current)
         {
             //success
-			gameStatusTextObject.text = "You beat " + chosenOtherPlayer + "'s " + chosenOtherPlayer.GetCurrentState() + " in battle";
+			gameStatusTextObject.text = "You beat " + chosenOtherPlayer.name + "'s " + chosenOtherPlayer.GetCurrentState() + " in battle";
             chosenOtherPlayer.Die();
         }
 		else if (chosenOtherPlayer.GetCurrentState() > current)
         {
             //fail
-			gameStatusTextObject.text = chosenOtherPlayer + " has a " + chosenOtherPlayer.GetCurrentState() + ". You died in battle";
+			gameStatusTextObject.text = chosenOtherPlayer.name + " has a " + chosenOtherPlayer.GetCurrentState() + ". You died in battle";
             Die();
         }
         else
         {
             //tie
-			gameStatusTextObject.text = chosenOtherPlayer + " has a " + chosenOtherPlayer.GetCurrentState() + ". You guys are tied";
+			gameStatusTextObject.text = chosenOtherPlayer.name + " has a " + chosenOtherPlayer.GetCurrentState() + ". You two tied";
 		}
-		isDoingTurn = false;
     }
 
 	IEnumerator PrinceForceDiscard()
@@ -224,7 +227,6 @@ public class PlayerController : MonoBehaviour, IGlobalTriggerPressDownHandler {
 		isChoosingOtherPlayer = false;
 		chosenOtherPlayer.SetState (nextState); // new state for other player
 		this.usedNextState = true; // let Game Master know you used the next card
-		isDoingTurn = false;
     }
 
 	IEnumerator KingTradeHands()
@@ -241,7 +243,6 @@ public class PlayerController : MonoBehaviour, IGlobalTriggerPressDownHandler {
         State temp = current;
 		current = chosenOtherPlayer.GetCurrentState ();
 		chosenOtherPlayer.SetState(temp);
-		isDoingTurn = false;
     }
     #endregion
 

@@ -16,10 +16,13 @@ public class GameMaster: MonoBehaviour {
 	int currentPlayerCount;
 
 	Random _Random = new Random();
+	const string _GameStatusWin = "Game over. You win!";
+	const string _GameStatusLose = "Game over. You lost.";
+	const string _GameStatusTie = "Game over. It was a tie!";
 
 	Queue<PlayerController> players;
 	State[] deck = new State[] {
-		State.Guard, State.Guard, State.Guard, State.Princess, State.Guard, 
+		State.Guard, State.Guard, State.Guard, State.Guard, State.Guard, 
 		State.Priest, State.Priest,
 		State.Baron, State.Baron,
 		State.Handmaid, State.Handmaid,
@@ -33,7 +36,6 @@ public class GameMaster: MonoBehaviour {
 
 	int nextStateIdx = 1; // Skips card at index 0 because one card is taken out.
 
-	// Use this for initialization
 	void Start () {
 		// Populate State Menu State Controllers
 		StateController[] menuStateControllers = stateMenuObject.GetComponentsInChildren<StateController>();
@@ -47,7 +49,7 @@ public class GameMaster: MonoBehaviour {
 		players = new Queue<PlayerController>();
 		players.Enqueue (player1);
 		players.Enqueue (player2);
-		//deck = ShuffleDeck(deck);
+		deck = ShuffleDeck(deck);
 		currentPlayerCount = 2;
 		while (nextStateIdx <= currentPlayerCount) {
 			PlayerController player = players.Dequeue();
@@ -57,8 +59,7 @@ public class GameMaster: MonoBehaviour {
 		currentPlayer = players.Dequeue();
 		StartPlayersTurn (deck [nextStateIdx++], deck [nextStateIdx]);
 	}
-	
-	// Update is called once per frame
+
 	void Update () {
 		if (currentPlayer.GetIsChoosingOwnState() != twoStateMenuObject.activeSelf) {
 			twoStateMenuObject.SetActive(currentPlayer.GetIsChoosingOwnState());
@@ -67,8 +68,16 @@ public class GameMaster: MonoBehaviour {
 		}
 
 		if (nextStateIdx == 16) {
-			//if (player1.GetCurrentState () < player2.GetCurrentState ()) {
-			//	player1.gameStatusTextObject = "You lose";
+			if (player1.GetCurrentState () < player2.GetCurrentState ()) {
+				player1.gameStatusTextObject.text = _GameStatusLose;
+				player2.gameStatusTextObject.text = _GameStatusWin;
+			} else if (player1.GetCurrentState () > player2.GetCurrentState ()) {
+				player1.gameStatusTextObject.text = _GameStatusWin;
+				player2.gameStatusTextObject.text = _GameStatusLose;
+			} else {
+				player1.gameStatusTextObject.text = _GameStatusTie;
+				player2.gameStatusTextObject.text = _GameStatusTie;
+			}
 
 		}
 		else if (!currentPlayer.GetIsDoingTurn()) {
@@ -87,13 +96,14 @@ public class GameMaster: MonoBehaviour {
 			if (currentPlayerCount == 1) {
 				currentPlayer.gameStatusTextObject.text = "You win!";
 			}
-			else {	
+			else if (currentPlayer.GetCurrentState() != State.Dead) {	
 				StartPlayersTurn (deck [nextStateIdx++], deck [nextStateIdx]);
 			}
 		}
 	}
 
 	void StartPlayersTurn(State next, State nextnext) {
+		Debug.Log (next + " next " + nextnext);
 		State previous = currentPlayer.GetCurrentState ();
 		currentPlayer.SetIsDoingTurn(true);
 		stateCard1.SetState(previous);
@@ -103,7 +113,7 @@ public class GameMaster: MonoBehaviour {
 	}
 
 	State[] ShuffleDeck(State[] deck) {
-		for (int i = deck.Length; i > 0; i--) {
+		for (int i = deck.Length-1; i > 0; i--) {
 			int j = Random.Range(0, i);
 			State temp = deck[i];
 			deck[i] = deck[j];
