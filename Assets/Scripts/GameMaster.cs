@@ -49,13 +49,18 @@ public class GameMaster: MonoBehaviour {
 		players = new Queue<PlayerController>();
 		players.Enqueue (player1);
 		players.Enqueue (player2);
-		deck = ShuffleDeck(deck);
 		currentPlayerCount = 2;
+
+		deck = ShuffleDeck(deck);
+
+		// Picking initial cards
 		while (nextStateIdx <= currentPlayerCount) {
 			PlayerController player = players.Dequeue();
 			player.SetState(deck[nextStateIdx++]);
 			players.Enqueue(player);
 		}
+
+		// Start first player's turn
 		currentPlayer = players.Dequeue();
 		StartPlayersTurn (deck [nextStateIdx++], deck [nextStateIdx]);
 	}
@@ -94,7 +99,7 @@ public class GameMaster: MonoBehaviour {
 			}
 			currentPlayer = players.Dequeue();
 			if (currentPlayerCount == 1) {
-				currentPlayer.gameStatusTextObject.text = "You win!";
+				currentPlayer.gameStatusTextObject.text = _GameStatusWin;
 			}
 			else if (currentPlayer.GetCurrentState() != State.Dead) {	
 				StartPlayersTurn (deck [nextStateIdx++], deck [nextStateIdx]);
@@ -103,12 +108,10 @@ public class GameMaster: MonoBehaviour {
 	}
 
 	void StartPlayersTurn(State next, State nextnext) {
-		Debug.Log (next + " next " + nextnext);
 		State previous = currentPlayer.GetCurrentState ();
 		currentPlayer.SetIsDoingTurn(true);
 		stateCard1.SetState(previous);
 		stateCard2.SetState(next);
-		Debug.Log ("Choice 1: " + previous + " Choice 2: " + next);
 		currentPlayer.StartTurn(next, nextnext);
 	}
 

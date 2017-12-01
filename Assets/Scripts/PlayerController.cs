@@ -15,6 +15,7 @@ public class PlayerController : MonoBehaviour, IGlobalTriggerPressDownHandler {
 	bool isChoosingOtherPlayer = false;
 	bool isChoosingOwnState = false;
 	bool isChoosingMenuState = false;
+	bool allowChooseSelf = false;
 
 	bool immune = false;
     PlayerController chosenOtherPlayer;
@@ -25,6 +26,10 @@ public class PlayerController : MonoBehaviour, IGlobalTriggerPressDownHandler {
 
 	bool usedNextState = false;
 	State nextState;
+
+	const string _GameStatusWin = "Game over. You win!";
+	const string _GameStatusLose = "Game over. You lost.";
+	const string _GameStatusTie = "Game over. It was a tie!";
 
 	// Use this for initialization
 	void Start () {
@@ -44,7 +49,7 @@ public class PlayerController : MonoBehaviour, IGlobalTriggerPressDownHandler {
     #region General Player Methods
 	public void SetState(State s) {
 		current = s;
-		stateTextObject.text = s.ToString();
+		stateTextObject.text = "Currently Holding: " + s.ToString();
 		Debug.Log (this + " state changed to " + s);
 	}
 
@@ -83,7 +88,7 @@ public class PlayerController : MonoBehaviour, IGlobalTriggerPressDownHandler {
 				yield return StartCoroutine(BaronBattle());
                 break;
 			case State.Handmaid:
-				gameStatusTextObject.text = "You are immune";
+				gameStatusTextObject.text = "You are immune until your next turn";
                 immune = true;
                 break;
 			case State.Prince:
@@ -134,7 +139,7 @@ public class PlayerController : MonoBehaviour, IGlobalTriggerPressDownHandler {
 
     void Die()
     {
-		gameStatusTextObject.text = "You lost!";
+		gameStatusTextObject.text = "You died! " + _GameStatusLose;
 		SetState (State.Dead);
     }
     #endregion
@@ -148,7 +153,6 @@ public class PlayerController : MonoBehaviour, IGlobalTriggerPressDownHandler {
 		gameStatusTextObject.text = "Choose another player you want to attack";
 		chosenOtherPlayer = null;
 		isChoosingOtherPlayer = true;
-		Debug.Log ("guard attack with guess: " + guess);
 		while (chosenOtherPlayer == null)
 		{
 			//wait for player to choose other player
@@ -166,7 +170,6 @@ public class PlayerController : MonoBehaviour, IGlobalTriggerPressDownHandler {
 			//fail
 			gameStatusTextObject.text = "You guessed incorrectly. " + chosenOtherPlayer.name + " is still in the game.";
 		} 
-		Debug.Log ("end of function call");
 	}
 
     IEnumerator PriestReveal()
@@ -219,12 +222,14 @@ public class PlayerController : MonoBehaviour, IGlobalTriggerPressDownHandler {
 		gameStatusTextObject.text = "Choose another player you want to force to change characters";
         chosenOtherPlayer = null;
         isChoosingOtherPlayer = true;
+		allowChooseSelf = true;
         while (chosenOtherPlayer == null)
         {
             //wait for player to choose other player
 			yield return null;
         }
 		isChoosingOtherPlayer = false;
+		allowChooseSelf = false;
 		chosenOtherPlayer.SetState (nextState); // new state for other player
 		this.usedNextState = true; // let Game Master know you used the next card
     }
@@ -241,7 +246,7 @@ public class PlayerController : MonoBehaviour, IGlobalTriggerPressDownHandler {
         }
         isChoosingOtherPlayer = false;
         State temp = current;
-		current = chosenOtherPlayer.GetCurrentState ();
+		this.SetState(chosenOtherPlayer.GetCurrentState ());
 		chosenOtherPlayer.SetState(temp);
     }
     #endregion
@@ -280,8 +285,10 @@ public class PlayerController : MonoBehaviour, IGlobalTriggerPressDownHandler {
 		if (isChoosingOtherPlayer) {
 			PlayerController otherPlayerController = eventData.currentRaycast.GetComponent<PlayerController> ();
 			Debug.Log ("Pointing at " + otherPlayerController);
-			if (otherPlayerController != null && otherPlayerController != this && !otherPlayerController.immune) {
-				chosenOtherPlayer = otherPlayerController;
+			if (otherPlayerController != null && !otherPlayerController.immune) {
+				if (allowChooseSelf || otherPlayerController != this ) {
+					chosenOtherPlayer = otherPlayerController;
+				}
 			}
 		} else if (isChoosingOwnState || isChoosingMenuState) {
 			
