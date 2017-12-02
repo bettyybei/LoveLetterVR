@@ -21,8 +21,11 @@ public class PlayerController : MonoBehaviour, IGlobalTriggerPressDownHandler {
     PlayerController chosenOtherPlayer;
 	StateController chosenStateController;
 
-    State current;
+
+	State current;
     State dismiss;
+
+	public State CurrentState { get { return current; } }
 
 	bool usedNextState = false;
 	State nextState;
@@ -184,7 +187,7 @@ public class PlayerController : MonoBehaviour, IGlobalTriggerPressDownHandler {
         }
         isChoosingOtherPlayer = false;
 		//Reveal other player
-		gameStatusTextObject.text = chosenOtherPlayer.name + " has a " + chosenOtherPlayer.GetCurrentState();
+		gameStatusTextObject.text = chosenOtherPlayer.name + " has a " + chosenOtherPlayer.CurrentState;
     }
 
 	IEnumerator BaronBattle()
@@ -198,22 +201,22 @@ public class PlayerController : MonoBehaviour, IGlobalTriggerPressDownHandler {
 			yield return null;
         }
         isChoosingOtherPlayer = false;
-		if (chosenOtherPlayer.GetCurrentState() < current)
+		if (chosenOtherPlayer.CurrentState < current)
         {
             //success
-			gameStatusTextObject.text = "You beat " + chosenOtherPlayer.name + "'s " + chosenOtherPlayer.GetCurrentState() + " in battle";
+			gameStatusTextObject.text = "You beat " + chosenOtherPlayer.name + "'s " + chosenOtherPlayer.CurrentState + " in battle";
             chosenOtherPlayer.Die();
         }
-		else if (chosenOtherPlayer.GetCurrentState() > current)
+		else if (chosenOtherPlayer.CurrentState > current)
         {
             //fail
-			gameStatusTextObject.text = chosenOtherPlayer.name + " has a " + chosenOtherPlayer.GetCurrentState() + ". You died in battle";
+			gameStatusTextObject.text = chosenOtherPlayer.name + " has a " + chosenOtherPlayer.CurrentState + ". You died in battle";
             Die();
         }
         else
         {
             //tie
-			gameStatusTextObject.text = chosenOtherPlayer.name + " has a " + chosenOtherPlayer.GetCurrentState() + ". You two tied";
+			gameStatusTextObject.text = chosenOtherPlayer.name + " has a " + chosenOtherPlayer.CurrentState + ". You two tied";
 		}
     }
 
@@ -246,15 +249,13 @@ public class PlayerController : MonoBehaviour, IGlobalTriggerPressDownHandler {
         }
         isChoosingOtherPlayer = false;
         State temp = current;
-		this.SetState(chosenOtherPlayer.GetCurrentState ());
+		this.SetState(chosenOtherPlayer.CurrentState);
 		chosenOtherPlayer.SetState(temp);
     }
     #endregion
 
 	#region Public Getters and Setters
-	public State GetCurrentState() {
-		return this.current;
-	}
+
 	public bool GetIsDoingTurn() {
 		return this.isDoingTurn;
 	}
@@ -293,9 +294,10 @@ public class PlayerController : MonoBehaviour, IGlobalTriggerPressDownHandler {
 		} else if (isChoosingOwnState || isChoosingMenuState) {
 			
 			StateController otherStateController = eventData.currentRaycast.GetComponent<StateController> ();
+			Debug.Log ("Pointing at state: " + otherStateController);
 			if (otherStateController != null) {
 				chosenStateController = otherStateController;
-				Debug.Log ("Pointing at state: " + chosenStateController.GetState ());
+
 			}
 		}
     }

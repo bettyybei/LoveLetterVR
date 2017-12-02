@@ -24,8 +24,6 @@ public class StateController : MonoBehaviour {
 		if (isCardController){
 			GetComponent<Renderer> ().material = Resources.Load<Material> ("Materials/Card_" + s.ToString());
 		}
-		Debug.Log (this + " set state to " + s);
-
 	}
 
 	public State GetState() {
