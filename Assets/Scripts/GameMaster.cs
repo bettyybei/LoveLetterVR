@@ -23,6 +23,7 @@ public class GameMaster: MonoBehaviour {
 
 	int currentPlayerCount;
 
+	// synced objects : deck, nextStateIdx, playerStates, currentPlayerIdx
 	public State[] deck = new State[] {
 		State.Guard, State.Guard, State.Guard, State.Guard, State.Guard, 
 		State.Priest, State.Priest,
@@ -33,11 +34,10 @@ public class GameMaster: MonoBehaviour {
 		State.Countess,
 		State.Princess
 	};
-
-	public State[] playerStates;
-
-	public int currentPlayerIdx = 0;
+		
 	public int nextStateIdx = 1; // Skips card at index 0 because one card is taken out.
+	public State[] playerStates;
+	public int currentPlayerIdx = 0;
 
 	void Start () {
 		// Populate State Menu State Controllers
@@ -51,10 +51,10 @@ public class GameMaster: MonoBehaviour {
 
 		deck = ShuffleDeck(deck);
 
-
 		players = new PlayerController[] {
 			player1, player2
 		};
+
 		currentPlayerCount = players.Length;
 		playerStates = new State[currentPlayerCount];
 
@@ -66,16 +66,16 @@ public class GameMaster: MonoBehaviour {
 		}
 
 		// Start first player's turn
-		//currentPlayer = players[currentPlayerIdx];
-		StartPlayersTurn (deck [nextStateIdx++], deck [nextStateIdx]);
+		StartPlayersTurn(deck [nextStateIdx++], deck [nextStateIdx]);
 	}
 
 	void Update () {
 		PlayerController currentPlayer = players [currentPlayerIdx];
-		if (currentPlayer.GetIsChoosingOwnState() != twoStateMenuObject.activeSelf) {
-			twoStateMenuObject.SetActive(currentPlayer.GetIsChoosingOwnState());
-		} else if (currentPlayer.GetIsChoosingMenuState() != stateMenuObject.activeSelf) {
-			stateMenuObject.SetActive(currentPlayer.GetIsChoosingMenuState());
+
+		if (currentPlayer.IsChoosingOwnState != twoStateMenuObject.activeSelf) {
+			twoStateMenuObject.SetActive(currentPlayer.IsChoosingOwnState);
+		} else if (currentPlayer.IsChoosingMenuState != stateMenuObject.activeSelf) {
+			stateMenuObject.SetActive(currentPlayer.IsChoosingMenuState);
 		}
 
 		if (nextStateIdx == 16) {
@@ -101,41 +101,38 @@ public class GameMaster: MonoBehaviour {
 			}
 
 			for (int i = 0; i < players.Length; i++) {
-				if (i == winnerIdx || i == tie1 || i == tie2)
-				if (tie1 > 0)
-					players [i].gameStatusTextObject.text = _GameStatusTie;
-				else {
-					players [i].gameStatusTextObject.text = _GameStatusWin;
-					Debug.Log (players [i] + " set to win here ");
+				if (i == winnerIdx || i == tie1 || i == tie2) {
+					if (tie1 > 0)
+						players[i].gameStatusTextObject.text = _GameStatusTie;
+					else
+						players[i].gameStatusTextObject.text = _GameStatusWin;
 				}
 				else 
 					players[i].gameStatusTextObject.text = _GameStatusLose;
 			}
 			nextStateIdx++;
 		}
-		else if (!currentPlayer.GetIsDoingTurn()) {
-			// sync up player states after the end of each turn ASK ABOUT THIS
+		else if (nextStateIdx < 16 && !currentPlayer.IsDoingTurn) {
+			// sync up and count player states after the end of each turn
+			currentPlayerCount = 0;
 			for (int i = 0; i < players.Length; i++) {
 				State s = players [i].CurrentState;
-				if (playerStates [i] != s) {
-					playerStates [i] = s;
-				}
+				if (s != State.Dead)
+					currentPlayerCount++;
+				if (playerStates[i] != s) 
+					playerStates[i] = s;
 			}
-
-			if (currentPlayer.CurrentState == State.Dead) {
-				currentPlayerCount--;
-			} else {
-				// Check if the player used the next card
-				if (currentPlayer.GetUsedNextState ()) {
-					nextStateIdx++;
-					currentPlayer.SetUsedNextState(false);
-				}
+				
+			if (currentPlayer.UsedNextState) {
+				nextStateIdx++;
+				currentPlayer.UsedNextState = false;
 			}
 
 			if (currentPlayerCount == 1) {
-				nextStateIdx = 16; //this ends the game
+				nextStateIdx = 16; //this ends the game in the next Update call
+				return;
 			}
-			//Debug.Log("idx " + currentPlayerIdx);
+
 			if (currentPlayerCount > 1) {
 				do {
 					currentPlayerIdx = (currentPlayerIdx + 1) % players.Length;
@@ -143,10 +140,7 @@ public class GameMaster: MonoBehaviour {
 					Debug.Log (currentPlayerIdx + " is idx, current player is " + currentPlayer.name);
 				} while(currentPlayer.CurrentState == State.Dead);
 			}
-		//	if (currentPlayerCount == 1 && currentPlayer.CurrentState != State.Dead) {
-		//		Debug.Log (currentPlayer + " set to win here ");
-		//		currentPlayer.gameStatusTextObject.text = _GameStatusWin;
-		//	}
+
 			if (currentPlayerCount > 1 && currentPlayer.CurrentState != State.Dead) {
 				StartPlayersTurn(deck[nextStateIdx++], deck[nextStateIdx]);
 			}
@@ -156,7 +150,7 @@ public class GameMaster: MonoBehaviour {
 	void StartPlayersTurn(State next, State nextnext) {
 		PlayerController currentPlayer = players[currentPlayerIdx];
 		State previous = currentPlayer.CurrentState;
-		currentPlayer.SetIsDoingTurn(true);
+		currentPlayer.IsDoingTurn = true;
 		stateCard1.SetState(previous);
 		stateCard2.SetState(next);
 		currentPlayer.StartTurn(next, nextnext);
