@@ -36,18 +36,18 @@ public class GameMaster: MonoBehaviour {
 	};
 		
 	public int nextStateIdx = 1; // Skips card at index 0 because one card is taken out.
-	public State[] playerStates;
+	public State[] playerStates; // playerStates will always be max # of players
 	public int currentPlayerIdx = 0;
 
 	void Start () {
 		// Populate State Menu State Controllers
 		StateController[] menuStateControllers = stateMenuObject.GetComponentsInChildren<StateController>();
-		for (int i=0; i<menuStateControllers.Length; i++) {
-			menuStateControllers[i].SetState ((State)(i + 1));
+		for (int i = 0; i < menuStateControllers.Length; i++) {
+			menuStateControllers[i].SetState((State)(i + 1));
 		}
 		StateController[] cardStateControllers = twoStateMenuObject.GetComponentsInChildren<StateController>();
-		stateCard1 = cardStateControllers [0];
-		stateCard2 = cardStateControllers [1];
+		stateCard1 = cardStateControllers[0];
+		stateCard2 = cardStateControllers[1];
 
 		deck = ShuffleDeck(deck);
 
@@ -56,17 +56,17 @@ public class GameMaster: MonoBehaviour {
 		};
 
 		currentPlayerCount = players.Length;
-		playerStates = new State[currentPlayerCount];
+		playerStates = new State[4];
 
 		// Picking initial cards
 		for (int i = 0; i < currentPlayerCount; i++) {
 			State s = deck[nextStateIdx++];
-			playerStates[i] = s;
 			players[i].SetState(s);
+			playerStates[i] = s;
 		}
 
 		// Start first player's turn
-		StartPlayersTurn(deck [nextStateIdx++], deck [nextStateIdx]);
+		StartPlayersTurn(deck[nextStateIdx++], deck[nextStateIdx]);
 	}
 
 	void Update () {
@@ -79,10 +79,10 @@ public class GameMaster: MonoBehaviour {
 		}
 
 		if (nextStateIdx == 16) {
+			// Game over. Calculate winner(s)
 			int winnerIdx = 0;
 			int tie1 = -1; 
 			int tie2 = -1; // rare, but a 3 way tie is possible
-
 			for (int i = 1; i < players.Length; i++) {
 				State state = players[i].CurrentState;
 				State maxState = players[winnerIdx].CurrentState;
@@ -100,6 +100,7 @@ public class GameMaster: MonoBehaviour {
 				}
 			}
 
+			// Set Game Status Text
 			for (int i = 0; i < players.Length; i++) {
 				if (i == winnerIdx || i == tie1 || i == tie2) {
 					if (tie1 > 0)
@@ -112,11 +113,12 @@ public class GameMaster: MonoBehaviour {
 			}
 			nextStateIdx++;
 		}
+
 		else if (nextStateIdx < 16 && !currentPlayer.IsDoingTurn) {
 			// sync up and count player states after the end of each turn
 			currentPlayerCount = 0;
 			for (int i = 0; i < players.Length; i++) {
-				State s = players [i].CurrentState;
+				State s = players[i].CurrentState;
 				if (s != State.Dead)
 					currentPlayerCount++;
 				if (playerStates[i] != s) 
