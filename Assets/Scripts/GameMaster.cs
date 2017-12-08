@@ -13,8 +13,6 @@ public class GameMaster: MonoBehaviour {
     StateController stateCard1;
     StateController stateCard2;
 
-    Random _Random = new Random();
-
     const string _GameStatusWin = "Game over. You win!";
     const string _GameStatusLose = "Game over. You lost.";
     const string _GameStatusTie = "Game over. It was a tie!";
