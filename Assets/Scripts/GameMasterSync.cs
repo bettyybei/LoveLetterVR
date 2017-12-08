@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Holojam;
 using Holojam.Tools;
+using State = GameMaster.State;
 
 public class GameMasterSync : Synchronizable {
 
@@ -13,7 +14,7 @@ public class GameMasterSync : Synchronizable {
 	}
 
 	public override bool Host {
-		get { return Holojam.Tools.BuildManager.IsMasterClient (); }
+		get { return Holojam.Tools.BuildManager.IsMasterClient(); }
 	}
 
 	public override bool AutoHost {
@@ -22,39 +23,51 @@ public class GameMasterSync : Synchronizable {
 
 	// Use this for initialization
 	void Start () {
-		master = GetComponent<GameMaster> ();
+		master = GetComponent<GameMaster>();
 	}
 
 	public override void ResetData() {
-		data = new Holojam.Network.Flake (0, 0, 0, 16);
+		data = new Holojam.Network.Flake(0, 0, 0, 22);
 	}
-
-	//int nextStateIdx
+		
 	//0-15 is the deck.
 	//16 is the nextStateIdx
 	//17-20 is the player current states
 	//21 is the currentPlayerIdx
 
-	public void PackDeck() {
-		for (int i = 0; i < master.deck.Length; i++) {
-			data.ints [i] = (int)master.deck [i];
+	public void PackInfo() {
+		int i = 0;
+		for (; i < 16; i++) {
+			data.ints[i] = (int) master.deck[i];
 		}
+		data.ints[i++] = master.nextStateIdx;
+		for (int j = 0; j < 4; j++) {
+			data.ints[i++] = (int) master.playerStates[j];
+		}
+		data.ints[i] = master.currentPlayerIdx;
 	}
 
-	public void UnpackDeck() {
-		master.deck = new GameMaster.State[16];
-		for (int i = 0; i < 16; i++) {
-			master.deck [i] = (GameMaster.State)data.ints [i];
+	public void UnpackInfo() {
+		int i = 0;
+		master.deck = new State[16];
+		for (; i < 16; i++) {
+			master.deck[i] = (State) data.ints[i];
 		}
+		master.nextStateIdx = data.ints [i++];
+		master.playerStates = new State[4];
+		for (int j = 0; j < 4; j++) {
+			master.playerStates[j] = (State) data.ints[i++];
+		}
+		master.currentPlayerIdx = data.ints[i];
 	}
 
 	protected override void Sync() {
 		if (Sending) {
 			//I am the captain now.
-			PackDeck();
+			PackInfo();
 		} else {
 			//I am not the captain now.
-			UnpackDeck();
+			UnpackInfo();
 		}
 	}
 }
