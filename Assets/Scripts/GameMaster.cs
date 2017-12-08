@@ -70,7 +70,7 @@ public class GameMaster: MonoBehaviour {
 	}
 
 	void Update () {
-		PlayerController currentPlayer = players [currentPlayerIdx];
+		PlayerController currentPlayer = players[currentPlayerIdx];
 
 		if (currentPlayer.IsChoosingOwnState != twoStateMenuObject.activeSelf) {
 			twoStateMenuObject.SetActive(currentPlayer.IsChoosingOwnState);
@@ -136,8 +136,7 @@ public class GameMaster: MonoBehaviour {
 			if (currentPlayerCount > 1) {
 				do {
 					currentPlayerIdx = (currentPlayerIdx + 1) % players.Length;
-					currentPlayer = players [currentPlayerIdx];
-					Debug.Log (currentPlayerIdx + " is idx, current player is " + currentPlayer.name);
+					currentPlayer = players[currentPlayerIdx];
 				} while(currentPlayer.CurrentState == State.Dead);
 			}
 
