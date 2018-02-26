@@ -30,7 +30,7 @@ public class GameMasterSync : Synchronizable {
 		data = new Holojam.Network.Flake(0, 0, 0, 22);
 	}
 		
-	//0-15 is the deck.
+	//0-15 is the deck
 	//16 is the nextStateIdx
 	//17-20 is the player current states
 	//21 is the currentPlayerIdx

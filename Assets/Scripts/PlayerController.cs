@@ -141,7 +141,6 @@ public class PlayerController : MonoBehaviour, IGlobalTriggerPressDownHandler {
     }
     #endregion
 
-
     #region Dismissal Actions
 
     IEnumerator GuardAttack() {
