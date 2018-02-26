@@ -214,7 +214,7 @@ public class PlayerController : MonoBehaviour, IGlobalTriggerPressDownHandler {
     #endregion
 
     #region Vive Controller Methods
-    public void OnGlobalTriggerPressDown(XREventData eventData)
+    public void OnGlobalTriggerPressDown(VREventData eventData)
     {
         if (eventData.currentRaycast == null)
             return;
