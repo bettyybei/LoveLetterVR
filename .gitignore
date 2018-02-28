@@ -8,6 +8,10 @@ Assets/HolojamSDK-Unity-dev/*
 Assets/HolojamSDK-Unity-dev.meta
 Assets/InputSystems-master/
 Assets/InputSystems-master.meta
+Assets/OVR/*
+Assets/OVR.meta
+Assets/Standard Assets/*
+Assets/Standard Assets.meta
 Assets/SteamVR/
 Assets/SteamVR.meta
 UnityPackageManager/*
