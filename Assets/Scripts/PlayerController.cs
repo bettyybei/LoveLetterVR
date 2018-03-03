@@ -7,8 +7,8 @@ using State = GameMaster.State;
 
 public class PlayerController : MonoBehaviour, IGlobalTriggerPressDownHandler {
 
-    public GameObject pointerObject;
-    public TextMesh stateTextObject;
+    //public GameObject pointerObject;
+    //public TextMesh stateTextObject;
     public TextMesh gameStatusTextObject;
 
     PlayerController chosenOtherPlayer;
@@ -19,11 +19,12 @@ public class PlayerController : MonoBehaviour, IGlobalTriggerPressDownHandler {
     private State NextStateInDeck { get; set; }
 
     public bool IsDoingTurn { get; set; }
+    public bool IsChoosingOtherPlayer { get; private set; }
     public bool IsChoosingOwnState { get; private set; }
     public bool IsChoosingMenuState { get; private set; }
     public bool UsedNextState { get; set; }
 
-    private bool IsChoosingOtherPlayer { get; set; }
+    
     private bool AllowChooseSelf { get; set; }
     private bool Immune { get; set; }
 
@@ -33,17 +34,17 @@ public class PlayerController : MonoBehaviour, IGlobalTriggerPressDownHandler {
     }
 
     void Update () {
-        bool pointerEnabled = IsChoosingOtherPlayer || IsChoosingOwnState || IsChoosingMenuState;
-        if (pointerEnabled != pointerObject.activeSelf)
-        {
-            pointerObject.SetActive(pointerEnabled);
-        }
+        //bool pointerEnabled = IsChoosingOtherPlayer || IsChoosingOwnState || IsChoosingMenuState;
+        //if (pointerEnabled != pointerObject.activeSelf)
+        //{
+        //    pointerObject.SetActive(pointerEnabled);
+        //}
     }
 
     #region General Player Methods
     public void SetState(State s) {
         CurrentState = s;
-        stateTextObject.text = "Currently Holding: " + s.ToString();
+        //stateTextObject.text = "Currently Holding: " + s.ToString();
     }
     public void SetGameStatus(string s) {
         gameStatusTextObject.text = s;
@@ -100,6 +101,7 @@ public class PlayerController : MonoBehaviour, IGlobalTriggerPressDownHandler {
                 break;
         }
         IsDoingTurn = false;
+        //IsFinishedDoingTurn = true;
     }
 
     IEnumerator ChooseStateToDismiss()
@@ -145,7 +147,7 @@ public class PlayerController : MonoBehaviour, IGlobalTriggerPressDownHandler {
     void Die()
     {
         gameStatusTextObject.text = "You died! Game over. You lost.";
-        SetState (State.Dead);
+        SetState(State.Dead);
     }
     #endregion
 

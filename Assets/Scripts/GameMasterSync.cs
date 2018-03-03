@@ -53,7 +53,7 @@ public class GameMasterSync : Synchronizable {
 		for (; i < 16; i++) {
 			master.deck[i] = (State) data.ints[i];
 		}
-		master.nextStateIdx = data.ints [i++];
+		master.nextStateIdx = data.ints[i++];
 		master.playerStates = new State[4];
 		for (int j = 0; j < 4; j++) {
 			master.playerStates[j] = (State) data.ints[i++];

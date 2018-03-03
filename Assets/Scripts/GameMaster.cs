@@ -1,12 +1,15 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
+using FRL.IO;
+using Holojam.Vive;
 public class GameMaster: MonoBehaviour {
     public enum State { Dead, Guard, Priest, Baron, Handmaid, Prince, King, Countess, Princess }
 
     public PlayerController player1;
     public PlayerController player2;
+    public ViveControllerReceiver receiver1;
+    public ViveControllerReceiver receiver2;
 
     public GameObject stateMenuObject;
     public GameObject twoStateMenuObject;
@@ -55,28 +58,26 @@ public class GameMaster: MonoBehaviour {
 
         currentPlayerCount = players.Length;
         playerStates = new State[4];
-
-        // Picking initial cards
-        for (int i = 0; i < currentPlayerCount; i++) {
-            State s = deck[nextStateIdx++];
-            players[i].SetState(s);
-            playerStates[i] = s;
-        }
-
         
         if (Holojam.Tools.BuildManager.IsMasterClient()) {
+            // Picking initial cards
+            for (int i = 0; i < currentPlayerCount; i++) {
+                State s = deck[nextStateIdx++];
+                players[i].SetState(s);
+                playerStates[i] = s;
+            }
             // Start first player's turn
             StartPlayersTurn(deck[nextStateIdx++], deck[nextStateIdx]);
         }
         else {
             for (int i = 0; i < currentPlayerCount; i++) {
                 if (Holojam.Tools.BuildManager.BUILD_INDEX - 1 == i) {
-                    players[i].pointerObject.SetActive(true);
-                    players[i].stateTextObject.gameObject.SetActive(true);
+                    //players[i].pointerObject.SetActive(true);
+                    //players[i].stateTextObject.gameObject.SetActive(true);
                     players[i].gameStatusTextObject.gameObject.SetActive(true);
                 } else {
-                    players[i].pointerObject.SetActive(false);
-                    players[i].stateTextObject.gameObject.SetActive(false);
+                    //players[i].pointerObject.SetActive(false);
+                    //players[i].stateTextObject.gameObject.SetActive(false);
                     players[i].gameStatusTextObject.gameObject.SetActive(false);
                 }
             }
@@ -85,11 +86,21 @@ public class GameMaster: MonoBehaviour {
 
     void Update () {
         PlayerController currentPlayer = players[currentPlayerIdx];
-
+        
         if (Holojam.Tools.BuildManager.IsMasterClient()) {
             //I am the master client. Manage game state.
 
-            if (Input.GetKeyDown("space")) {
+            ViveControllerReceiver receiver = receiver1;
+            switch((currentPlayerIdx+1)) {
+                case 1:
+                    receiver = receiver1;
+                    break;
+                case 2:
+                    receiver = receiver2;
+                    break;
+            }
+
+            if (Input.GetKeyDown("space") && nextStateIdx < 16) {
                 currentPlayerIdx = (currentPlayerIdx + 1) % players.Length;
                 currentPlayer = players[currentPlayerIdx];
                 StartPlayersTurn(deck[nextStateIdx++], deck[nextStateIdx]);
@@ -129,7 +140,8 @@ public class GameMaster: MonoBehaviour {
                 }
                 nextStateIdx++;
 
-            } else if (nextStateIdx < 16 && !currentPlayer.IsDoingTurn) {
+            }
+            else if (receiver.GetPressDown(Valve.VR.EVRButtonId.k_EButton_Grip) && nextStateIdx < 16) {
                 // Sync up and count player states after the end of each turn
                 currentPlayerCount = 0;
                 for (int i = 0; i < players.Length; i++) {
@@ -164,8 +176,37 @@ public class GameMaster: MonoBehaviour {
             }
         }
         else {
-            //I am just a client. Update the visuals of my game to match the values
-            //Being automatically set by Master Client.
+            // Sync playerStates from Master Client
+            for (int i = 0; i < players.Length; i++) {
+                State s = playerStates[i];
+                if (players[i].CurrentState != s) {
+                    players[i].SetState(s);
+                    Debug.Log("SYNCING STATE");
+                    Debug.Log("player " + (i + 1) + " state should be " + s);
+                }
+            }
+
+            if (!currentPlayer.IsDoingTurn) {
+
+                // Make sure all other players and not doing their turn
+                for (int i = 0; i < players.Length; i++) {
+                    if (players[i] != currentPlayer) {
+                        players[i].IsDoingTurn = false;
+                    }
+                }
+
+                if (currentPlayer.CurrentState != State.Dead) {
+                    Debug.Log("Start players turn");
+                    StartPlayersTurn(deck[nextStateIdx - 1], deck[nextStateIdx]);
+                    return;
+                }
+                else {
+                    Debug.Log("Illegal State");
+                    // currentPlayer state == dead is not possible,
+                    // wait for the next Update() for the states to be synced
+                    return;
+                }
+            }
 
             PlayerController clientPlayer = players[Holojam.Tools.BuildManager.BUILD_INDEX - 1];
 
