@@ -63,87 +63,131 @@ public class GameMaster: MonoBehaviour {
             playerStates[i] = s;
         }
 
-        // Start first player's turn
-        StartPlayersTurn(deck[nextStateIdx++], deck[nextStateIdx]);
+        
+        if (Holojam.Tools.BuildManager.IsMasterClient()) {
+            // Start first player's turn
+            StartPlayersTurn(deck[nextStateIdx++], deck[nextStateIdx]);
+        }
+        else {
+            for (int i = 0; i < currentPlayerCount; i++) {
+                if (Holojam.Tools.BuildManager.BUILD_INDEX - 1 == i) {
+                    players[i].pointerObject.SetActive(true);
+                    players[i].stateTextObject.gameObject.SetActive(true);
+                    players[i].gameStatusTextObject.gameObject.SetActive(true);
+                } else {
+                    players[i].pointerObject.SetActive(false);
+                    players[i].stateTextObject.gameObject.SetActive(false);
+                    players[i].gameStatusTextObject.gameObject.SetActive(false);
+                }
+            }
+        }
     }
 
     void Update () {
         PlayerController currentPlayer = players[currentPlayerIdx];
 
-        if (currentPlayer.IsChoosingOwnState != twoStateMenuObject.activeSelf) {
-            twoStateMenuObject.SetActive(currentPlayer.IsChoosingOwnState);
-        } else if (currentPlayer.IsChoosingMenuState != stateMenuObject.activeSelf) {
-            stateMenuObject.SetActive(currentPlayer.IsChoosingMenuState);
-        }
+        if (Holojam.Tools.BuildManager.IsMasterClient()) {
+            //I am the master client. Manage game state.
 
-        if (nextStateIdx == 16) {
-            // Game over. Calculate winner(s)
-            int winnerIdx = 0;
-            int tie1 = -1; 
-            int tie2 = -1; // rare, but a 3 way tie is possible
-            for (int i = 1; i < players.Length; i++) {
-                State state = players[i].CurrentState;
-                State maxState = players[winnerIdx].CurrentState;
-                if (state > maxState) {
-                    winnerIdx = i;
-                    tie1 = -1;
-                    tie2 = -1;
-                }
-                if (state == maxState) {
-                    // save tied indices
-                    if (tie1 > 0)
-                        tie2 = i;
-                    else
-                        tie1 = i;
-                }
-            }
-
-            // Set Game Status Text
-            for (int i = 0; i < players.Length; i++) {
-                if (i == winnerIdx || i == tie1 || i == tie2) {
-                    if (tie1 > 0)
-                        players[i].gameStatusTextObject.text = _GameStatusTie;
-                    else
-                        players[i].gameStatusTextObject.text = _GameStatusWin;
-                }
-                else 
-                    players[i].gameStatusTextObject.text = _GameStatusLose;
-            }
-            nextStateIdx++;
-        }
-
-        else if (nextStateIdx < 16 && !currentPlayer.IsDoingTurn) {
-            // sync up and count player states after the end of each turn
-            currentPlayerCount = 0;
-            for (int i = 0; i < players.Length; i++) {
-                State s = players[i].CurrentState;
-                if (s != State.Dead)
-                    currentPlayerCount++;
-                if (playerStates[i] != s) 
-                    playerStates[i] = s;
-            }
-                
-            if (currentPlayer.UsedNextState) {
-                nextStateIdx++;
-                currentPlayer.UsedNextState = false;
-            }
-
-            if (currentPlayerCount == 1) {
-                nextStateIdx = 16; //this ends the game in the next Update call
-                return;
-            }
-
-            if (currentPlayerCount > 1) {
-                do {
-                    currentPlayerIdx = (currentPlayerIdx + 1) % players.Length;
-                    currentPlayer = players[currentPlayerIdx];
-                } while(currentPlayer.CurrentState == State.Dead);
-            }
-
-            if (currentPlayerCount > 1 && currentPlayer.CurrentState != State.Dead) {
+            if (Input.GetKeyDown("space")) {
+                currentPlayerIdx = (currentPlayerIdx + 1) % players.Length;
+                currentPlayer = players[currentPlayerIdx];
                 StartPlayersTurn(deck[nextStateIdx++], deck[nextStateIdx]);
             }
+
+            if (nextStateIdx == 16) {
+                // Game over. Calculate winner(s)
+                int winnerIdx = 0;
+                int tie1 = -1;
+                int tie2 = -1; // 3 way tie is possible
+                for (int i = 1; i < players.Length; i++) {
+                    State state = players[i].CurrentState;
+                    State maxState = players[winnerIdx].CurrentState;
+                    if (state > maxState) {
+                        winnerIdx = i;
+                        tie1 = -1;
+                        tie2 = -1;
+                    }
+                    if (state == maxState) {
+                        // save tied indices
+                        if (tie1 > 0)
+                            tie2 = i;
+                        else
+                            tie1 = i;
+                    }
+                }
+
+                // Set Game Status Text
+                for (int i = 0; i < players.Length; i++) {
+                    if (i == winnerIdx || i == tie1 || i == tie2) {
+                        if (tie1 > 0)
+                            players[i].gameStatusTextObject.text = _GameStatusTie;
+                        else
+                            players[i].gameStatusTextObject.text = _GameStatusWin;
+                    } else
+                        players[i].gameStatusTextObject.text = _GameStatusLose;
+                }
+                nextStateIdx++;
+
+            } else if (nextStateIdx < 16 && !currentPlayer.IsDoingTurn) {
+                // Sync up and count player states after the end of each turn
+                currentPlayerCount = 0;
+                for (int i = 0; i < players.Length; i++) {
+                    State s = players[i].CurrentState;
+                    if (s != State.Dead)
+                        currentPlayerCount++;
+                    if (playerStates[i] != s)
+                        playerStates[i] = s;
+                }
+
+                // When currentPlayer used Prince card, advance the deck another card
+                if (currentPlayer.UsedNextState) { 
+                    nextStateIdx++;
+                    currentPlayer.UsedNextState = false;
+                }
+
+                if (currentPlayerCount == 1) {
+                    nextStateIdx = 16; //this ends the game in the next Update call
+                    return;
+                }
+
+                if (currentPlayerCount > 1) {
+                    do {
+                        currentPlayerIdx = (currentPlayerIdx + 1) % players.Length;
+                        currentPlayer = players[currentPlayerIdx];
+                    } while (currentPlayer.CurrentState == State.Dead);
+                }
+
+                if (currentPlayerCount > 1 && currentPlayer.CurrentState != State.Dead) {
+                    StartPlayersTurn(deck[nextStateIdx++], deck[nextStateIdx]);
+                }
+            }
         }
+        else {
+            //I am just a client. Update the visuals of my game to match the values
+            //Being automatically set by Master Client.
+
+            PlayerController clientPlayer = players[Holojam.Tools.BuildManager.BUILD_INDEX - 1];
+
+            if (currentPlayer == clientPlayer) {
+                // currentPlayer is me
+
+                // Show menus based on what the player is currently choosing
+                if (currentPlayer.IsChoosingOwnState != twoStateMenuObject.activeSelf) {
+                    twoStateMenuObject.SetActive(currentPlayer.IsChoosingOwnState);
+                }
+                else if (currentPlayer.IsChoosingMenuState != stateMenuObject.activeSelf) {
+                    stateMenuObject.SetActive(currentPlayer.IsChoosingMenuState);
+                }
+            }
+            else {
+                // clientPlayer is me
+                if (twoStateMenuObject.activeSelf != false) twoStateMenuObject.SetActive(false);
+                if (stateMenuObject.activeSelf != false) stateMenuObject.SetActive(false);
+                clientPlayer.SetGameStatus("Player " + (currentPlayerIdx + 1) + " is doing their turn");
+            }
+        }
+
     }
 
     void StartPlayersTurn(State next, State nextnext) {

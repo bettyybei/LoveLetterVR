@@ -27,6 +27,11 @@ public class PlayerController : MonoBehaviour, IGlobalTriggerPressDownHandler {
     private bool AllowChooseSelf { get; set; }
     private bool Immune { get; set; }
 
+    void Start () {
+        // stateTextObject.gameObject.SetActive(true);
+
+    }
+
     void Update () {
         bool pointerEnabled = IsChoosingOtherPlayer || IsChoosingOwnState || IsChoosingMenuState;
         if (pointerEnabled != pointerObject.activeSelf)
@@ -39,6 +44,9 @@ public class PlayerController : MonoBehaviour, IGlobalTriggerPressDownHandler {
     public void SetState(State s) {
         CurrentState = s;
         stateTextObject.text = "Currently Holding: " + s.ToString();
+    }
+    public void SetGameStatus(string s) {
+        gameStatusTextObject.text = s;
     }
 
     public void StartTurn(State next, State nextnext) //nextnext is needed for PrinceForceDiscard()
