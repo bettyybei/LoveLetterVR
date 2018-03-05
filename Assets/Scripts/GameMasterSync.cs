@@ -21,7 +21,6 @@ public class GameMasterSync : Synchronizable {
 		get { return Host; }
 	}
 
-	// Use this for initialization
 	void Start () {
 		master = GetComponent<GameMaster>();
 	}

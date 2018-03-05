@@ -63,7 +63,7 @@ public class GameMaster: MonoBehaviour {
             // Picking initial cards
             for (int i = 0; i < currentPlayerCount; i++) {
                 State s = deck[nextStateIdx++];
-                players[i].SetState(s);
+                players[i].CurrentState = s;
                 playerStates[i] = s;
             }
             // Start first player's turn
@@ -72,12 +72,8 @@ public class GameMaster: MonoBehaviour {
         else {
             for (int i = 0; i < currentPlayerCount; i++) {
                 if (Holojam.Tools.BuildManager.BUILD_INDEX - 1 == i) {
-                    //players[i].pointerObject.SetActive(true);
-                    //players[i].stateTextObject.gameObject.SetActive(true);
                     players[i].gameStatusTextObject.gameObject.SetActive(true);
                 } else {
-                    //players[i].pointerObject.SetActive(false);
-                    //players[i].stateTextObject.gameObject.SetActive(false);
                     players[i].gameStatusTextObject.gameObject.SetActive(false);
                 }
             }
@@ -88,7 +84,6 @@ public class GameMaster: MonoBehaviour {
         PlayerController currentPlayer = players[currentPlayerIdx];
         
         if (Holojam.Tools.BuildManager.IsMasterClient()) {
-            //I am the master client. Manage game state.
 
             ViveControllerReceiver receiver = receiver1;
             switch((currentPlayerIdx+1)) {
@@ -128,7 +123,7 @@ public class GameMaster: MonoBehaviour {
                     }
                 }
 
-                // Set Game Status Text
+                // Set Final Game Status Text
                 for (int i = 0; i < players.Length; i++) {
                     if (i == winnerIdx || i == tie1 || i == tie2) {
                         if (tie1 > 0)
@@ -139,13 +134,12 @@ public class GameMaster: MonoBehaviour {
                         players[i].gameStatusTextObject.text = _GameStatusLose;
                 }
                 nextStateIdx++;
-
             }
-            else if (receiver.GetPressDown(Valve.VR.EVRButtonId.k_EButton_Grip) && nextStateIdx < 16) {
+            else if (currentPlayer.IsEndingTurn && nextStateIdx < 16) {
                 // Sync up and count player states after the end of each turn
                 currentPlayerCount = 0;
                 for (int i = 0; i < players.Length; i++) {
-                    State s = players[i].CurrentState;
+                    State s = players[i].CurrentState; // Change to BroadcastData
                     if (s != State.Dead)
                         currentPlayerCount++;
                     if (playerStates[i] != s)
@@ -180,13 +174,12 @@ public class GameMaster: MonoBehaviour {
             for (int i = 0; i < players.Length; i++) {
                 State s = playerStates[i];
                 if (players[i].CurrentState != s) {
-                    players[i].SetState(s);
+                    players[i].CurrentState = s;
                     Debug.Log("Syncing State from Master");
                 }
             }
 
             if (!currentPlayer.IsDoingTurn) {
-
                 // Make sure all other players and not doing their turn
                 for (int i = 0; i < players.Length; i++) {
                     if (players[i] != currentPlayer) {
@@ -197,7 +190,7 @@ public class GameMaster: MonoBehaviour {
                 if (currentPlayer.CurrentState != State.Dead) {
                     Debug.Log("Start players turn");
                     StartPlayersTurn(deck[nextStateIdx - 1], deck[nextStateIdx]);
-                    return;
+                    //return;
                 }
                 else {
                     Debug.Log("Illegal State");

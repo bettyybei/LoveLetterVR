@@ -1,12 +1,14 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using State = GameMaster.State;
 
 public class StateTextController : MonoBehaviour {
 
     public PlayerController player1;
     public PlayerController player2;
 
+    private State previousFrameState;
     private TextMesh textMesh;
     private PlayerController player;
 
@@ -28,8 +30,10 @@ public class StateTextController : MonoBehaviour {
     // Update is called once per frame
     void Update () {
         if (!player) return;
+        if (previousFrameState == player.CurrentState) return;
+
         string stateText = "";
-        if (player.CurrentState == GameMaster.State.Dead) {
+        if (player.CurrentState == State.Dead) {
             stateText = "Out of the round";
         }
         else {

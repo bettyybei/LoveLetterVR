@@ -7,45 +7,41 @@ using State = GameMaster.State;
 
 public class PlayerController : MonoBehaviour, IGlobalTriggerPressDownHandler {
 
-    //public GameObject pointerObject;
-    //public TextMesh stateTextObject;
     public TextMesh gameStatusTextObject;
+    public int Number;
+    private int Index;
 
     PlayerController chosenOtherPlayer;
     StateController chosenStateController;
 
-    public State CurrentState { get; private set; }
+    public State CurrentState { get; set; }
     private State DismissState { get; set; }
     private State NextStateInDeck { get; set; }
 
+    public bool IsBroadcasting { get; set; }
+    public bool IsEndingTurn { get; set; }
     public bool IsDoingTurn { get; set; }
     public bool IsChoosingOtherPlayer { get; private set; }
     public bool IsChoosingOwnState { get; private set; }
     public bool IsChoosingMenuState { get; private set; }
+    public bool Immune { get; set; }
     public bool UsedNextState { get; set; }
 
-    
+    public int[] BroadcastStates { get; set; }
+
+
     private bool AllowChooseSelf { get; set; }
-    private bool Immune { get; set; }
 
-    void Start () {
-        // stateTextObject.gameObject.SetActive(true);
-
+    void Start() {
+        BroadcastStates = new int[4];
+        Index = Number - 1;
     }
 
-    void Update () {
-        //bool pointerEnabled = IsChoosingOtherPlayer || IsChoosingOwnState || IsChoosingMenuState;
-        //if (pointerEnabled != pointerObject.activeSelf)
-        //{
-        //    pointerObject.SetActive(pointerEnabled);
-        //}
+    void Update() {
+
     }
 
     #region General Player Methods
-    public void SetState(State s) {
-        CurrentState = s;
-        //stateTextObject.text = "Currently Holding: " + s.ToString();
-    }
     public void SetGameStatus(string s) {
         gameStatusTextObject.text = s;
     }
@@ -58,21 +54,16 @@ public class PlayerController : MonoBehaviour, IGlobalTriggerPressDownHandler {
         StartCoroutine(ChooseDismiss());
     }
 
-    IEnumerator ChooseDismiss()
-    {
-        if (DismissState == State.Countess && (CurrentState == State.Prince || CurrentState == State.King) )
-        {
+    IEnumerator ChooseDismiss() {
+        if (DismissState == State.Countess && (CurrentState == State.Prince || CurrentState == State.King)) {
             // Skip choosing state to dismiss
             gameStatusTextObject.text = "The Countess is dismissed because you have a Prince or King";
-        }
-        else
-        {
+        } else {
             gameStatusTextObject.text = "Choose a card you would like to discard and enact its power";
             yield return StartCoroutine(ChooseStateToDismiss());
         }
-            
-        switch (DismissState)
-        {
+
+        switch (DismissState) {
             case State.Guard:
                 yield return StartCoroutine(ChooseOtherPlayerState());
                 yield return StartCoroutine(GuardAttack());
@@ -101,11 +92,10 @@ public class PlayerController : MonoBehaviour, IGlobalTriggerPressDownHandler {
                 break;
         }
         IsDoingTurn = false;
-        //IsFinishedDoingTurn = true;
+        IsBroadcasting = true;
     }
 
-    IEnumerator ChooseStateToDismiss()
-    {
+    IEnumerator ChooseStateToDismiss() {
         chosenStateController = null;
         IsChoosingOwnState = true;
         while (chosenStateController == null) {
@@ -116,13 +106,12 @@ public class PlayerController : MonoBehaviour, IGlobalTriggerPressDownHandler {
         if (chosenStateController.GetState() == CurrentState) // If they want to dismiss their current state
         {
             State temp = CurrentState;
-            SetState(DismissState);
+            CurrentState = DismissState;
             DismissState = temp;
         }
     }
 
-    IEnumerator ChooseOtherPlayerState()
-    {
+    IEnumerator ChooseOtherPlayerState() {
         gameStatusTextObject.text = "Choose a state you believe another player has";
         chosenStateController = null;
         IsChoosingMenuState = true;
@@ -136,18 +125,20 @@ public class PlayerController : MonoBehaviour, IGlobalTriggerPressDownHandler {
     IEnumerator ChooseOtherPlayer() {
         chosenOtherPlayer = null;
         IsChoosingOtherPlayer = true;
-        while (chosenOtherPlayer == null)
-        {
+        while (chosenOtherPlayer == null) {
             //wait for player to choose other player
             yield return null;
         }
         IsChoosingOtherPlayer = false;
     }
 
-    void Die()
-    {
+    void Die() {
         gameStatusTextObject.text = "You died! Game over. You lost.";
-        SetState(State.Dead);
+        CurrentState = State.Dead;
+    }
+
+    void SetBroadcastState(PlayerController player, State s) {
+        BroadcastStates[player.Index] = (int) s;
     }
     #endregion
 
@@ -161,13 +152,13 @@ public class PlayerController : MonoBehaviour, IGlobalTriggerPressDownHandler {
         if (chosenOtherPlayer.CurrentState == guess)
         {
             //success
-            gameStatusTextObject.text = "You guessed correct! " + chosenOtherPlayer.name + " is dead.";
-            chosenOtherPlayer.Die();
+            gameStatusTextObject.text = "You guessed correct! Player " + chosenOtherPlayer.Number + " is dead.";
+            SetBroadcastState(chosenOtherPlayer, State.Dead);
         }
         else
         {
             //fail
-            gameStatusTextObject.text = "You guessed incorrectly. " + chosenOtherPlayer.name + " is still in the game.";
+            gameStatusTextObject.text = "You guessed incorrectly. Player" + chosenOtherPlayer.Number + " is still in the game.";
         } 
     }
 
@@ -187,7 +178,7 @@ public class PlayerController : MonoBehaviour, IGlobalTriggerPressDownHandler {
         {
             //success
             gameStatusTextObject.text = "You beat " + chosenOtherPlayer.name + "'s " + chosenOtherPlayer.CurrentState + " in battle";
-            chosenOtherPlayer.Die();
+            SetBroadcastState(chosenOtherPlayer, State.Dead);
         }
         else if (chosenOtherPlayer.CurrentState > CurrentState)
         {
@@ -208,7 +199,7 @@ public class PlayerController : MonoBehaviour, IGlobalTriggerPressDownHandler {
         AllowChooseSelf = true;
         yield return StartCoroutine(ChooseOtherPlayer());
         AllowChooseSelf = false;
-        chosenOtherPlayer.SetState(NextStateInDeck); // new state for other player
+        SetBroadcastState(chosenOtherPlayer, NextStateInDeck); // new state for other player
         UsedNextState = true; // used to let Game Master know you used the next card
     }
 
@@ -216,9 +207,8 @@ public class PlayerController : MonoBehaviour, IGlobalTriggerPressDownHandler {
     {
         gameStatusTextObject.text = "Choose another player you want to switch characters with";
         yield return StartCoroutine(ChooseOtherPlayer());
-        State temp = CurrentState;
-        this.SetState(chosenOtherPlayer.CurrentState);
-        chosenOtherPlayer.SetState(temp);
+        SetBroadcastState(chosenOtherPlayer, CurrentState);
+        CurrentState = chosenOtherPlayer.CurrentState;
     }
     #endregion
 
