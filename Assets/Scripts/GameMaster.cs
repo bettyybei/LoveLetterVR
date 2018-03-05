@@ -181,8 +181,7 @@ public class GameMaster: MonoBehaviour {
                 State s = playerStates[i];
                 if (players[i].CurrentState != s) {
                     players[i].SetState(s);
-                    Debug.Log("SYNCING STATE");
-                    Debug.Log("player " + (i + 1) + " state should be " + s);
+                    Debug.Log("Syncing State from Master");
                 }
             }
 

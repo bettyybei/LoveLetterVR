@@ -27,6 +27,7 @@ public class StateTextController : MonoBehaviour {
 
     // Update is called once per frame
     void Update () {
+        if (!player) return;
         string stateText = "";
         if (player.CurrentState == GameMaster.State.Dead) {
             stateText = "Out of the round";

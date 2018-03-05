@@ -21,9 +21,10 @@ public class PointerController : MonoBehaviour {
                 Debug.Log("ERROR IN POINTER");
                 break;
         }
-	}
+    }
 	
 	void Update () {
+        if (!player) return;
         bool pointerEnabled = player.IsChoosingOtherPlayer || player.IsChoosingOwnState || player.IsChoosingMenuState;
         if (pointerEnabled != gameObject.activeSelf) {
             gameObject.SetActive(pointerEnabled);
