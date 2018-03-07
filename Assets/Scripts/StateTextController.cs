@@ -31,7 +31,7 @@ public class StateTextController : MonoBehaviour {
     void Update () {
         if (!player) return;
         if (previousFrameState == player.CurrentState) return;
-
+        previousFrameState = player.CurrentState;
         string stateText = "";
         if (player.CurrentState == State.Dead) {
             stateText = "Out of the round";
