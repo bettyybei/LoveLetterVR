@@ -84,7 +84,6 @@ public class GameMaster: MonoBehaviour {
         PlayerController currentPlayer = players[currentPlayerIdx];
         
         if (Holojam.Tools.BuildManager.IsMasterClient()) {
-
             ViveControllerReceiver receiver = receiver1;
             switch((currentPlayerIdx+1)) {
                 case 1:
@@ -136,10 +135,11 @@ public class GameMaster: MonoBehaviour {
                 nextStateIdx++;
             }
             else if (currentPlayer.IsEndingTurn && nextStateIdx < 16) {
+                currentPlayer.IsEndingTurn = false;
                 // Sync up and count player states after the end of each turn
                 currentPlayerCount = 0;
                 for (int i = 0; i < players.Length; i++) {
-                    State s = players[i].CurrentState; // Change to BroadcastData
+                    State s = currentPlayer.BroadcastStates[i];
                     if (s != State.Dead)
                         currentPlayerCount++;
                     if (playerStates[i] != s)
@@ -179,7 +179,7 @@ public class GameMaster: MonoBehaviour {
                 }
             }
 
-            if (!currentPlayer.IsDoingTurn) {
+            if (!currentPlayer.IsDoingTurn && !currentPlayer.IsBroadcasting) {
                 // Make sure all other players and not doing their turn
                 for (int i = 0; i < players.Length; i++) {
                     if (players[i] != currentPlayer) {

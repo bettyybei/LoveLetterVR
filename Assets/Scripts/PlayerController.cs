@@ -4,6 +4,7 @@ using UnityEngine;
 using FRL.IO;
 using State = GameMaster.State;
 [RequireComponent(typeof(Receiver))]
+[RequireComponent(typeof(PlayerSync))]
 
 public class PlayerController : MonoBehaviour, IGlobalTriggerPressDownHandler {
 
@@ -27,13 +28,13 @@ public class PlayerController : MonoBehaviour, IGlobalTriggerPressDownHandler {
     public bool Immune { get; set; }
     public bool UsedNextState { get; set; }
 
-    public int[] BroadcastStates { get; set; }
+    public State[] BroadcastStates { get; set; }
 
 
     private bool AllowChooseSelf { get; set; }
 
     void Start() {
-        BroadcastStates = new int[4];
+        BroadcastStates = new State[4];
         Index = Number - 1;
     }
 
@@ -138,7 +139,7 @@ public class PlayerController : MonoBehaviour, IGlobalTriggerPressDownHandler {
     }
 
     void SetBroadcastState(PlayerController player, State s) {
-        BroadcastStates[player.Index] = (int) s;
+        BroadcastStates[player.Index] = s;
     }
     #endregion
 

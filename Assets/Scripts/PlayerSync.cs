@@ -8,14 +8,14 @@ using State = GameMaster.State;
 public class PlayerSync : Synchronizable {
 
     public string label = "PlayerSync";
-    public int playerIndex = 1;
+    public int Number = 1;
 
     private PlayerController player;
     private int packCount = 0;
 
     public override bool Host {
         get {
-            return playerIndex == BuildManager.BUILD_INDEX;
+            return Number == BuildManager.BUILD_INDEX;
         }
     }
 
@@ -28,23 +28,27 @@ public class PlayerSync : Synchronizable {
     }
 
     public override void ResetData() {
-        data = new Holojam.Network.Flake(0, 0, 0, 22);
+        data = new Holojam.Network.Flake(0, 0, 0, 9);
     }
 
-    // 0 something changed
+    // 0 something changed from last frame
     // 1 is player CurrentState
     // 2 is Immune
     // 3 is UsedNextState
     // 4-8 is BroadcastData
 
     public void PackInfo() {
+        // Player only broadcasts if they are the currentPlayer and their turn has ended
         if (player.IsBroadcasting) {
             int i = 0;
             data.ints[i++] = ++packCount;
-            data.ints[i++] = (int)player.CurrentState;
+            data.ints[i++] = (int) player.CurrentState;
             data.ints[i++] = player.Immune ? 0 : 1;
             data.ints[i++] = player.UsedNextState ? 0 : 1;
-            // broadcastdata
+            for (int j=0; j<4; j++) {
+                // CurrentPlayer may have change other player's states
+                data.ints[i++] =(int) player.BroadcastStates[j];
+            }
             player.IsBroadcasting = false;
         }
     }
@@ -52,10 +56,13 @@ public class PlayerSync : Synchronizable {
     public void UnpackInfo() {
         int i = 0;
         if (data.ints[i++] != packCount) {
-            player.CurrentState = (State)data.ints[i++];
+            player.CurrentState = (State) data.ints[i++];
             player.Immune = data.ints[i++] == 1 ? true : false;
             player.UsedNextState = data.ints[i++] == 1 ? true : false;
-            // broadcastdata
+            for (int j=0; j<4; j++) {
+                // Save these so GameMaster has access to them
+                player.BroadcastStates[j] = (State) data.ints[i++];
+            }
             player.IsEndingTurn = true;
         }
     }

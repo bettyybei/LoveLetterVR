@@ -14,7 +14,7 @@ public class GameMasterSync : Synchronizable {
 	}
 
 	public override bool Host {
-		get { return Holojam.Tools.BuildManager.IsMasterClient(); }
+		get { return BuildManager.IsMasterClient(); }
 	}
 
 	public override bool AutoHost {
