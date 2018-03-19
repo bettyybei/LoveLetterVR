@@ -19,7 +19,7 @@ public class PlayerSync : Synchronizable {
         }
     }
 
-    public override bool AutoHost { get { return Host; } }
+    public override bool AutoHost { get { return false; } }
 
     public override string Label { get { return label; } }
 
@@ -39,7 +39,8 @@ public class PlayerSync : Synchronizable {
 
     public void PackInfo() {
         // Player only broadcasts if they are the currentPlayer and their turn has ended
-        if (player.IsBroadcasting) {
+        //if (player.IsBroadcasting) {
+            Debug.Log(player.name + " is broadcasting");
             int i = 0;
             data.ints[i++] = ++packCount;
             data.ints[i++] = (int) player.CurrentState;
@@ -50,7 +51,7 @@ public class PlayerSync : Synchronizable {
                 data.ints[i++] =(int) player.BroadcastStates[j];
             }
             player.IsBroadcasting = false;
-        }
+        //}
     }
 
     public void UnpackInfo() {
@@ -68,11 +69,10 @@ public class PlayerSync : Synchronizable {
     }
 
     protected override void Sync() {
-        if (Sending) {
+        if (Sending && player.IsBroadcasting) {
             //The player index that matches the build index will send here.
             PackInfo();
         } else {
-            //If my player index doesn't match the build index, I will receive here.
             UnpackInfo();
         }
     }

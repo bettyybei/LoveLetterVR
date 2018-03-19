@@ -94,6 +94,7 @@ public class PlayerController : MonoBehaviour, IGlobalTriggerPressDownHandler {
         }
         IsDoingTurn = false;
         IsBroadcasting = true;
+        Debug.Log("end of "+ this.name + "'s turn in PlayerController");
     }
 
     IEnumerator ChooseStateToDismiss() {

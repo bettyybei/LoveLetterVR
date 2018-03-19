@@ -82,64 +82,81 @@ public class GameMaster: MonoBehaviour {
 
     void Update () {
         PlayerController currentPlayer = players[currentPlayerIdx];
-        
-        if (Holojam.Tools.BuildManager.IsMasterClient()) {
-            ViveControllerReceiver receiver = receiver1;
-            switch((currentPlayerIdx+1)) {
-                case 1:
-                    receiver = receiver1;
-                    break;
-                case 2:
-                    receiver = receiver2;
-                    break;
-            }
 
+        if (nextStateIdx > 16) return;
+
+        if (Holojam.Tools.BuildManager.IsMasterClient()) {
             if (Input.GetKeyDown("space") && nextStateIdx < 16) {
                 currentPlayerIdx = (currentPlayerIdx + 1) % players.Length;
                 currentPlayer = players[currentPlayerIdx];
                 StartPlayersTurn(deck[nextStateIdx++], deck[nextStateIdx]);
             }
-
-            if (nextStateIdx == 16) {
-                // Game over. Calculate winner(s)
-                int winnerIdx = 0;
-                int tie1 = -1;
-                int tie2 = -1; // 3 way tie is possible
-                for (int i = 1; i < players.Length; i++) {
-                    State state = players[i].CurrentState;
-                    State maxState = players[winnerIdx].CurrentState;
-                    if (state > maxState) {
-                        winnerIdx = i;
-                        tie1 = -1;
-                        tie2 = -1;
-                    }
-                    if (state == maxState) {
-                        // save tied indices
-                        if (tie1 > 0)
-                            tie2 = i;
-                        else
-                            tie1 = i;
-                    }
+        }
+        else {
+            // Sync playerStates from Master Client
+            for (int i = 0; i < players.Length; i++) {
+                State s = playerStates[i];
+                if (players[i].CurrentState != s) {
+                    players[i].CurrentState = s;
+                    Debug.Log("Syncing State from Master");
                 }
-
-                // Set Final Game Status Text
-                for (int i = 0; i < players.Length; i++) {
-                    if (i == winnerIdx || i == tie1 || i == tie2) {
-                        if (tie1 > 0)
-                            players[i].gameStatusTextObject.text = _GameStatusTie;
-                        else
-                            players[i].gameStatusTextObject.text = _GameStatusWin;
-                    } else
-                        players[i].gameStatusTextObject.text = _GameStatusLose;
-                }
-                nextStateIdx++;
             }
-            else if (currentPlayer.IsEndingTurn && nextStateIdx < 16) {
+        }
+
+        if (nextStateIdx == 16) {
+            // Game over. Calculate winner(s)
+            int winnerIdx = 0;
+            int tie1 = -1;
+            int tie2 = -1; // 3 way tie is possible
+            for (int i = 1; i < players.Length; i++) {
+                State state = players[i].CurrentState;
+                State maxState = players[winnerIdx].CurrentState;
+                if (state > maxState) {
+                    winnerIdx = i;
+                    tie1 = -1;
+                    tie2 = -1;
+                }
+                if (state == maxState) {
+                    // save tied indices
+                    if (tie1 > 0)
+                        tie2 = i;
+                    else
+                        tie1 = i;
+                }
+            }
+
+            // Set Final Game Status Text
+            for (int i = 0; i < players.Length; i++) {
+                if (i == winnerIdx || i == tie1 || i == tie2) {
+                    if (tie1 > 0)
+                        players[i].gameStatusTextObject.text = _GameStatusTie;
+                    else
+                        players[i].gameStatusTextObject.text = _GameStatusWin;
+                } else
+                    players[i].gameStatusTextObject.text = _GameStatusLose;
+            }
+            nextStateIdx++;
+        }
+
+        if (Holojam.Tools.BuildManager.IsMasterClient()) {
+            //ViveControllerReceiver receiver = receiver1;
+            //switch((currentPlayerIdx+1)) {
+            //    case 1:
+            //        receiver = receiver1;
+            //        break;
+            //    case 2:
+            //        receiver = receiver2;
+            //        break;
+            //}
+            
+            if (currentPlayer.IsEndingTurn && nextStateIdx < 16) {
+                Debug.Log(currentPlayer.name + " is ending their turn");
                 currentPlayer.IsEndingTurn = false;
                 // Sync up and count player states after the end of each turn
                 currentPlayerCount = 0;
                 for (int i = 0; i < players.Length; i++) {
                     State s = currentPlayer.BroadcastStates[i];
+                    Debug.Log("Player " + (i + 1) + " state is " + s);
                     if (s != State.Dead)
                         currentPlayerCount++;
                     if (playerStates[i] != s)
@@ -170,15 +187,6 @@ public class GameMaster: MonoBehaviour {
             }
         }
         else {
-            // Sync playerStates from Master Client
-            for (int i = 0; i < players.Length; i++) {
-                State s = playerStates[i];
-                if (players[i].CurrentState != s) {
-                    players[i].CurrentState = s;
-                    Debug.Log("Syncing State from Master");
-                }
-            }
-
             if (!currentPlayer.IsDoingTurn && !currentPlayer.IsBroadcasting) {
                 // Make sure all other players and not doing their turn
                 for (int i = 0; i < players.Length; i++) {
@@ -190,7 +198,6 @@ public class GameMaster: MonoBehaviour {
                 if (currentPlayer.CurrentState != State.Dead) {
                     Debug.Log("Start players turn");
                     StartPlayersTurn(deck[nextStateIdx - 1], deck[nextStateIdx]);
-                    //return;
                 }
                 else {
                     Debug.Log("Illegal State");
