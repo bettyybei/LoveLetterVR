@@ -56,8 +56,9 @@ public class PlayerSync : Synchronizable {
 
     public void UnpackInfo() {
         int i = 0;
-        if (data.ints[i++] != packCount) {
+        if (data.ints[i] != packCount) {
             Debug.Log("Player Sync Unpack");
+            packCount = data.ints[i++];
             player.CurrentState = (State) data.ints[i++];
             player.Immune = data.ints[i++] == 1 ? true : false;
             player.UsedNextState = data.ints[i++] == 1 ? true : false;
