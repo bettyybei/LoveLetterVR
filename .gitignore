@@ -16,6 +16,12 @@ Assets/SteamVR/
 Assets/SteamVR.meta
 UnityPackageManager/*
 
+
+Assets/StreamingAssets/*
+Assets/StreamingAssets.meta
+Assets/Unity-Logs-Viewer/*
+Assets/Unity-Logs-Viewer.meta
+
 .vs/
 
 [Ll]ibrary/
