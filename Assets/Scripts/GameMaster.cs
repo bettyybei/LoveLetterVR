@@ -236,6 +236,10 @@ public class GameMaster: MonoBehaviour {
         currentPlayer.IsDoingTurn = true;
         stateCard1.SetState(previous);
         stateCard2.SetState(next);
+
+        for (int i = 0; i < playerStates.Length; i++) {
+            currentPlayer.BroadcastStates[i] = playerStates[i];
+        }
         currentPlayer.StartTurn(next, nextnext);
     }
 
