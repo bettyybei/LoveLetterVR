@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using FRL.IO;
 using Holojam.Vive;
+using Holojam.Tools;
+
 public class GameMaster: MonoBehaviour {
     public enum State { Dead, Guard, Priest, Baron, Handmaid, Prince, King, Countess, Princess }
 
@@ -238,9 +240,10 @@ public class GameMaster: MonoBehaviour {
         currentPlayer.IsDoingTurn = true;
         stateCard1.SetState(previous);
         stateCard2.SetState(next);
-
-        for (int i = 0; i < playerStates.Length; i++) {
-            currentPlayer.BroadcastStates[i] = playerStates[i];
+        if (!BuildManager.IsMasterClient()) {
+            for (int i = 0; i < playerStates.Length; i++) {
+                currentPlayer.BroadcastStates[i] = playerStates[i];
+            }
         }
         currentPlayer.StartTurn(next, nextnext);
     }
