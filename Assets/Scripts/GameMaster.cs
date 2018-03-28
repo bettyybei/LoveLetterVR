@@ -200,7 +200,6 @@ public class GameMaster: MonoBehaviour {
                 }
 
                 if (currentPlayer.CurrentState != State.Dead) {
-                    Debug.Log("Start players turn");
                     StartPlayersTurn(deck[nextStateIdx - 1], deck[nextStateIdx]);
                 }
                 else {
@@ -245,6 +244,7 @@ public class GameMaster: MonoBehaviour {
                 currentPlayer.BroadcastStates[i] = playerStates[i];
             }
         }
+        Debug.Log("Starting player " + currentPlayer.Number + "'s turn with " + currentPlayer.CurrentState + next + nextnext);
         currentPlayer.StartTurn(next, nextnext);
     }
 

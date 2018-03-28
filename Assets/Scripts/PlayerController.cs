@@ -231,7 +231,7 @@ public class PlayerController : MonoBehaviour, IGlobalTriggerPressDownHandler {
         } else if (IsChoosingOwnState || IsChoosingMenuState) {
             
             StateController otherStateController = eventData.currentRaycast.GetComponent<StateController> ();
-            Debug.Log ("Pointing at state: " + otherStateController);
+            Debug.Log ("Pointing at state: " + otherStateController.GetState());
             if (otherStateController != null) {
                 chosenStateController = otherStateController;
 
