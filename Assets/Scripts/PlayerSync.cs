@@ -44,8 +44,8 @@ public class PlayerSync : Synchronizable {
             int i = 0;
             data.ints[i++] = ++packCount;
             data.ints[i++] = (int) player.CurrentState;
-            data.ints[i++] = player.Immune ? 0 : 1;
-            data.ints[i++] = player.UsedNextState ? 0 : 1;
+            data.ints[i++] = player.Immune ? 1 : 0;
+            data.ints[i++] = player.UsedNextState ? 1 : 0;
             for (int j=0; j<4; j++) {
                 // CurrentPlayer may have change other player's states
                 data.ints[i++] =(int) player.BroadcastStates[j];
@@ -57,6 +57,7 @@ public class PlayerSync : Synchronizable {
     public void UnpackInfo() {
         int i = 0;
         if (data.ints[i++] != packCount) {
+            Debug.Log("Player Sync Unpack");
             player.CurrentState = (State) data.ints[i++];
             player.Immune = data.ints[i++] == 1 ? true : false;
             player.UsedNextState = data.ints[i++] == 1 ? true : false;
@@ -72,7 +73,8 @@ public class PlayerSync : Synchronizable {
         if (Sending && player.IsBroadcasting) {
             //The player index that matches the build index will send here.
             PackInfo();
-        } else {
+        }
+        if (BuildManager.IsMasterClient()) {
             UnpackInfo();
         }
     }

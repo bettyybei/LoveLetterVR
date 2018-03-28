@@ -94,7 +94,7 @@ public class PlayerController : MonoBehaviour, IGlobalTriggerPressDownHandler {
         }
         IsDoingTurn = false;
         IsBroadcasting = true;
-        Debug.Log("end of "+ this.name + "'s turn in PlayerController");
+        Debug.Log("end of "+ this.name + "'s turn in PlayerController. Begin broadcasting.");
     }
 
     IEnumerator ChooseStateToDismiss() {
