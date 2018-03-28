@@ -159,8 +159,10 @@ public class GameMaster: MonoBehaviour {
                     Debug.Log("Player " + (i + 1) + " state is " + s);
                     if (s != State.Dead)
                         currentPlayerCount++;
-                    if (playerStates[i] != s)
+                    if (playerStates[i] != s) {
                         playerStates[i] = s;
+                        players[i].CurrentState = s;
+                    }
                 }
 
                 // When currentPlayer used Prince card, advance the deck another card
@@ -168,7 +170,7 @@ public class GameMaster: MonoBehaviour {
                     nextStateIdx++;
                     currentPlayer.UsedNextState = false;
                 }
-
+                Debug.Log("Current Player Count: " + currentPlayerCount);
                 if (currentPlayerCount == 1) {
                     nextStateIdx = 16; //this ends the game in the next Update call
                     return;
