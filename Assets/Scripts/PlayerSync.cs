@@ -57,7 +57,7 @@ public class PlayerSync : Synchronizable {
     public void UnpackInfo() {
         int i = 0;
         if (data.ints[i] != packCount) {
-            Debug.Log("Player Sync Unpack");
+            Debug.Log("Player " + Number + " Sync Unpack " + data.ints[i] + " " + packCount);
             packCount = data.ints[i++];
             player.CurrentState = (State) data.ints[i++];
             player.Immune = data.ints[i++] == 1 ? true : false;
@@ -73,9 +73,9 @@ public class PlayerSync : Synchronizable {
     protected override void Sync() {
         if (Sending && player.IsBroadcasting) {
             //The player index that matches the build index will send here.
+            Debug.Log("Player " + player.name + " is broadcasting and packing info");
             PackInfo();
-        }
-        if (BuildManager.IsMasterClient()) {
+        } else {
             UnpackInfo();
         }
     }
