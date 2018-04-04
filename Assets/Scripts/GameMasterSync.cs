@@ -1,9 +1,6 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using Holojam;
-using Holojam.Tools;
+﻿using Holojam.Tools;
 using State = GameMaster.State;
+using System.Text;
 
 public class GameMasterSync : Synchronizable {
 
@@ -26,13 +23,16 @@ public class GameMasterSync : Synchronizable {
 	}
 
 	public override void ResetData() {
-		data = new Holojam.Network.Flake(0, 0, 0, 22);
+		data = new Holojam.Network.Flake(0, 0, 0, 24, 0, true);
 	}
 		
 	//0-15 is the deck
 	//16 is the nextStateIdx
 	//17-20 is the player current states
 	//21 is the currentPlayerIdx
+    //22-23 are the TwoStateMenu states to display
+    
+    //text is game status of players separated by "_"
 
 	public void PackInfo() {
 		int i = 0;
@@ -41,9 +41,20 @@ public class GameMasterSync : Synchronizable {
 		}
 		data.ints[i++] = master.nextStateIdx;
 		for (int j = 0; j < 4; j++) {
-			data.ints[i++] = (int) master.playerStates[j];
+            if (j < master.players.Length) {
+                data.ints[i] = (int) master.players[j].CurrentState;
+            }
+            i++;
 		}
-		data.ints[i] = master.currentPlayerIdx;
+		data.ints[i++] = master.currentPlayerIdx;
+        data.ints[i++] = (int) master.stateCard1.GetState();
+        data.ints[i++] = (int) master.stateCard2.GetState();
+
+        StringBuilder sb = new StringBuilder();
+        for (int j = 0; j < master.players.Length; j++) {
+            sb.Append(master.players[j].gameStatusTextObject.text).Append("_");
+        }
+        data.text = sb.ToString();
 	}
 
 	public void UnpackInfo() {
@@ -53,11 +64,20 @@ public class GameMasterSync : Synchronizable {
 			master.deck[i] = (State) data.ints[i];
 		}
 		master.nextStateIdx = data.ints[i++];
-		master.playerStates = new State[4];
 		for (int j = 0; j < 4; j++) {
-			master.playerStates[j] = (State) data.ints[i++];
+            if (j < master.players.Length) {
+                master.players[j].CurrentState = (State) data.ints[i];
+            }
+            i++;
 		}
-		master.currentPlayerIdx = data.ints[i];
+		master.currentPlayerIdx = data.ints[i++];
+        master.stateCard1.SetState((State) data.ints[i++]);
+        master.stateCard2.SetState((State) data.ints[i++]);
+
+        string[] gameStatusTexts = data.text.Split('_');
+        for (int j = 0; j < (gameStatusTexts.Length - 1); j++) {
+            master.players[j].gameStatusTextObject.text = gameStatusTexts[j];
+        }
 	}
 
 	protected override void Sync() {
