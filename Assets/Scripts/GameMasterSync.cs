@@ -1,8 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using Holojam;
-using Holojam.Tools;
+﻿using Holojam.Tools;
 using State = GameMaster.State;
 using System.Text;
 
@@ -27,14 +23,13 @@ public class GameMasterSync : Synchronizable {
 	}
 
 	public override void ResetData() {
-		data = new Holojam.Network.Flake(0, 0, 0, 24, 0, true);
+		data = new Holojam.Network.Flake(0, 0, 0, 22, 0, true);
 	}
 		
 	//0-15 is the deck
 	//16 is the nextStateIdx
 	//17-20 is the player current states
 	//21 is the currentPlayerIdx
-    //22-23 are the TwoStateMenu states to display
     
     //text is game status of players separated by "_"
 
@@ -68,7 +63,6 @@ public class GameMasterSync : Synchronizable {
 			master.deck[i] = (State) data.ints[i];
 		}
 		master.nextStateIdx = data.ints[i++];
-		//master.playerStates = new State[4];
 		for (int j = 0; j < 4; j++) {
             if (j < master.players.Length) {
                 master.players[j].CurrentState = (State) data.ints[i];
@@ -81,7 +75,7 @@ public class GameMasterSync : Synchronizable {
 
         string[] gameStatusTexts = data.text.Split('_');
         for (int j = 0; j < (gameStatusTexts.Length - 1); j++) {
-            master.players[j].SetGameStatus(gameStatusTexts[j]);
+            master.players[j].gameStatusTextObject.text = gameStatusTexts[j];
         }
 	}
 
