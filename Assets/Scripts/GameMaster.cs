@@ -23,6 +23,7 @@ public class GameMaster: MonoBehaviour {
     const string _GameStatusTie = "Game over. It was a tie!";
     const string _ChooseOwnStateText = "Choose a card you would like to discard and enact its power";
     const string _ChooseOtherPlayerStateText = "Choose a state you believe another player has";
+    const string _ChooseAnotherPlayerText = "Choose another player ";
 
     public PlayerController[] players;
 
@@ -197,10 +198,13 @@ public class GameMaster: MonoBehaviour {
                 // currentPlayer is me
 
                 // Show menus based on what the player is currently choosing
-                if (currentPlayer.GetGameStatus().Equals(_ChooseOwnStateText) != twoStateMenuObject.activeSelf) {
-                    twoStateMenuObject.SetActive(!twoStateMenuObject.activeSelf);
-                } else if (currentPlayer.GetGameStatus().Equals(_ChooseOtherPlayerStateText) != stateMenuObject.activeSelf) {
-                    stateMenuObject.SetActive(!stateMenuObject.activeSelf);
+                currentPlayer.IsChoosingOwnState = currentPlayer.GetGameStatus().Equals(_ChooseOwnStateText);
+                currentPlayer.IsChoosingMenuState = currentPlayer.GetGameStatus().Equals(_ChooseOtherPlayerStateText);
+                currentPlayer.IsChoosingOtherPlayer = currentPlayer.GetGameStatus().StartsWith(_ChooseAnotherPlayerText);
+                if (currentPlayer.IsChoosingOwnState != twoStateMenuObject.activeSelf) {
+                    twoStateMenuObject.SetActive(currentPlayer.IsChoosingOwnState);
+                } else if (currentPlayer.IsChoosingMenuState != stateMenuObject.activeSelf) {
+                    stateMenuObject.SetActive(currentPlayer.IsChoosingMenuState);
                 }
             } else {
                 // currentPlayer is not me
@@ -319,7 +323,7 @@ public class GameMaster: MonoBehaviour {
         PlayerController player = players[currentPlayerIdx];
         State guess = player.chosenStateController.GetState();
 
-        player.SetGameStatus("Choose another player you want to attack");
+        player.SetGameStatus(_ChooseAnotherPlayerText + "you want to attack");
         yield return StartCoroutine(ChooseOtherPlayer());
         if (player.chosenOtherPlayer.CurrentState == guess) {
             //success
@@ -333,7 +337,7 @@ public class GameMaster: MonoBehaviour {
 
     IEnumerator PriestReveal() {
         PlayerController player = players[currentPlayerIdx];
-        player.SetGameStatus("Choose another player to reveal their character");
+        player.SetGameStatus(_ChooseAnotherPlayerText + "to reveal their character");
         yield return StartCoroutine(ChooseOtherPlayer());
         //Reveal other player
         player.SetGameStatus(player.chosenOtherPlayer.name + " has a " + player.chosenOtherPlayer.CurrentState);
@@ -341,7 +345,7 @@ public class GameMaster: MonoBehaviour {
 
     IEnumerator BaronBattle() {
         PlayerController player = players[currentPlayerIdx];
-        player.SetGameStatus("Choose another player you want to battle against");
+        player.SetGameStatus(_ChooseAnotherPlayerText + "you want to battle against");
         yield return StartCoroutine(ChooseOtherPlayer());
         if (player.chosenOtherPlayer.CurrentState < player.CurrentState) {
             //success
@@ -359,7 +363,7 @@ public class GameMaster: MonoBehaviour {
 
     IEnumerator PrinceForceDiscard() {
         PlayerController player = players[currentPlayerIdx];
-        player.SetGameStatus("Choose another player you want to force to change characters");
+        player.SetGameStatus(_ChooseAnotherPlayerText + "you want to force to change characters");
         player.AllowChooseSelf = true;
         yield return StartCoroutine(ChooseOtherPlayer());
         player.AllowChooseSelf = false;
@@ -369,7 +373,7 @@ public class GameMaster: MonoBehaviour {
 
     IEnumerator KingTradeHands() {
         PlayerController player = players[currentPlayerIdx];
-        player.SetGameStatus("Choose another player you want to switch characters with");
+        player.SetGameStatus(_ChooseAnotherPlayerText + "you want to switch characters with");
         yield return StartCoroutine(ChooseOtherPlayer());
         State temp = player.CurrentState;
         player.CurrentState = player.chosenOtherPlayer.CurrentState;

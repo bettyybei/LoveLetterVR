@@ -79,7 +79,6 @@ public class GameMasterSync : Synchronizable {
         master.stateCard1.SetState((State) data.ints[i++]);
         master.stateCard2.SetState((State) data.ints[i++]);
 
-        Debug.Log("status texts: " + data.text);
         string[] gameStatusTexts = data.text.Split('_');
         for (int j = 0; j < (gameStatusTexts.Length - 1); j++) {
             master.players[j].SetGameStatus(gameStatusTexts[j]);
