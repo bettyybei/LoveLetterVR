@@ -1,5 +1,4 @@
 ﻿using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using FRL.IO;
 using Holojam.Vive;
@@ -16,16 +15,15 @@ public class GameMaster: MonoBehaviour {
     public StateController stateCard1 { get; private set; }
     public StateController stateCard2 { get; private set; }
 
+    public PlayerController[] players;
+    int currentPlayerCount;
+
     const string _GameStatusWin = "Game over. You win!";
     const string _GameStatusLose = "Game over. You lost.";
     const string _GameStatusTie = "Game over. It was a tie!";
     const string _ChooseOwnStateText = "Choose a card you would like to discard and enact its power";
     const string _ChooseOtherPlayerStateText = "Choose a state you believe another player has";
     const string _ChooseAnotherPlayerText = "Choose another player ";
-
-    public PlayerController[] players;
-
-    int currentPlayerCount;
 
     public State[] deck = new State[] {
         State.Guard, State.Guard, State.Guard, State.Guard, State.Guard, 
@@ -84,7 +82,6 @@ public class GameMaster: MonoBehaviour {
 
     void Update () {
         PlayerController currentPlayer = players[currentPlayerIdx];
-
         if (nextStateIdx > 16) return;
 
 
@@ -136,19 +133,13 @@ public class GameMaster: MonoBehaviour {
 
             // Current player ended their turn
             if (!currentPlayer.IsDoingTurn && nextStateIdx < 16) {
-                Debug.Log(currentPlayer.name + " is ending their turn");
                 // Sync up and count player states after the end of each turn
                 currentPlayerCount = 0;
                 for (int i = 0; i < players.Length; i++) {
-                    Debug.Log("*Player " + (i + 1) + " state is " + players[i].CurrentState);
                     if (players[i].CurrentState != State.Dead)
                         currentPlayerCount++;
                 }
                 
-                //for (int i=0; i<players.Length; i++) {
-                //    Debug.Log("checking player " + players[i].Number + players[i].CurrentState);
-                //}
-
                 Debug.Log("Current Player Count: " + currentPlayerCount);
                 Debug.Log("nextStateIdx " + nextStateIdx + " currentPlayerIdx " + currentPlayerIdx);
                 if (currentPlayerCount == 1) {
@@ -174,6 +165,8 @@ public class GameMaster: MonoBehaviour {
             clientPlayer.IsChoosingMenuState = clientPlayer.GetGameStatus().Equals(_ChooseOtherPlayerStateText);
             clientPlayer.IsChoosingOtherPlayer = clientPlayer.GetGameStatus().StartsWith(_ChooseAnotherPlayerText);
 
+            //Debug.Log("" + clientPlayer.IsChoosingOtherPlayer + clientPlayer.IsChoosingOwnState + clientPlayer.IsChoosingMenuState);
+
             if (currentPlayer == clientPlayer) {
                 // currentPlayer is me
 
@@ -194,7 +187,7 @@ public class GameMaster: MonoBehaviour {
     void StartPlayersTurn(State next) {
         for (int i = 0; i < players.Length; i++) {
             if (i != currentPlayerIdx) {
-                players[i].SetGameStatus("Player " + (currentPlayerIdx + 1) + " is doing their turn");
+                players[i].SetGameStatus(players[currentPlayerIdx].GetName() + " is doing their turn");
             }
         }
 
@@ -315,11 +308,12 @@ public class GameMaster: MonoBehaviour {
         if (player.chosenOtherPlayer != null) {
             if (player.chosenOtherPlayer.CurrentState == guess) {
                 //success
-                player.SetGameStatus("You guessed correct! Player " + player.chosenOtherPlayer.Number + " is out");
-                player.chosenOtherPlayer.Die("Player " + player.Number + " used a guard and guessed your character correctly. You are out!");
+                player.SetGameStatus("You guessed correct! " + player.GetName() + " is out");
+                player.chosenOtherPlayer.Die(player.GetName() + " used a guard and guessed correctly. You are out!");
             } else {
                 //fail
-                player.SetGameStatus("You guessed incorrectly. Player" + player.chosenOtherPlayer.Number + " is still in the game");
+                player.SetGameStatus("You guessed incorrectly. " + player.GetName() + " is still in the game");
+                player.chosenOtherPlayer.SetGameStatus(player.GetName() + " used a guard and knows you do not have a " + guess);
             }
         }
     }
@@ -330,8 +324,8 @@ public class GameMaster: MonoBehaviour {
         yield return StartCoroutine(ChooseOtherPlayer());
         if (player.chosenOtherPlayer != null) {
             //Reveal other player
-            player.SetGameStatus(player.chosenOtherPlayer.name + " has a " + player.chosenOtherPlayer.CurrentState);
-
+            player.SetGameStatus(player.GetName() + " has a " + player.chosenOtherPlayer.CurrentState);
+            player.chosenOtherPlayer.SetGameStatus(player.GetName() + "'s priest found out you have a " + player.chosenOtherPlayer.CurrentState + ". Watch out!");
         }
     }
 
@@ -342,15 +336,15 @@ public class GameMaster: MonoBehaviour {
         if (player.chosenOtherPlayer != null) {
             if (player.chosenOtherPlayer.CurrentState < player.CurrentState) {
                 //success
-                player.SetGameStatus("You beat Player " + player.chosenOtherPlayer.Number + "'s " + player.chosenOtherPlayer.CurrentState + " in battle");
-                player.chosenOtherPlayer.Die("Player " + player.Number + " used a Baron and beat your " + player.chosenOtherPlayer.CurrentState + " in battle. You are out!");
+                player.SetGameStatus("You beat " + player.GetName() + "'s " + player.chosenOtherPlayer.CurrentState + " in battle");
+                player.chosenOtherPlayer.Die(player.GetName() + " used a Baron and beat your " + player.chosenOtherPlayer.CurrentState + " in battle. You are out!");
             } else if (player.chosenOtherPlayer.CurrentState > player.CurrentState) {
                 //fail
-                player.Die("Player " + player.chosenOtherPlayer.Number + " has a " + player.chosenOtherPlayer.CurrentState + ". You are out");
+                player.Die(player.GetName() + " has a " + player.chosenOtherPlayer.CurrentState + ". You are out");
             } else {
                 //tie
-                player.SetGameStatus("Player " + player.chosenOtherPlayer.Number + " has a " + player.chosenOtherPlayer.CurrentState + ". You two tied");
-                player.chosenOtherPlayer.SetGameStatus("Player " + player.chosenOtherPlayer.Number + " used a Baron but he also has a " + player.chosenOtherPlayer.CurrentState + ". You two tied");
+                player.SetGameStatus(player.GetName() + " has a " + player.chosenOtherPlayer.CurrentState + ". You two tied");
+                player.chosenOtherPlayer.SetGameStatus(player.GetName() + " used a Baron but he also has a " + player.chosenOtherPlayer.CurrentState + ". You two tied");
 
             }
         }
@@ -363,7 +357,9 @@ public class GameMaster: MonoBehaviour {
         yield return StartCoroutine(ChooseOtherPlayer());
         if (player.chosenOtherPlayer != null) {
             player.AllowChooseSelf = false;
-            player.chosenOtherPlayer.CurrentState = deck[nextStateIdx++]; // new state for other player
+            State newState = deck[nextStateIdx++];
+            player.chosenOtherPlayer.CurrentState = newState; // new state for other player
+            player.chosenOtherPlayer.SetGameStatus(player.GetName() + "'s Prince forced you to get a new card. You received a " + newState);
         }
     }
 
@@ -376,7 +372,7 @@ public class GameMaster: MonoBehaviour {
             player.CurrentState = player.chosenOtherPlayer.CurrentState;
             player.chosenOtherPlayer.CurrentState = temp;
             player.SetGameStatus("You received a " + player.CurrentState);
-            player.chosenOtherPlayer.SetGameStatus("Player " + player.Number + " switched characters with you.");
+            player.chosenOtherPlayer.SetGameStatus(player.GetName() + " switched characters with you.");
         }
     }
     #endregion

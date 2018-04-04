@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class PointerController : MonoBehaviour {
 
@@ -26,6 +24,7 @@ public class PointerController : MonoBehaviour {
 	void Update () {
         if (!player) return;
         bool pointerEnabled = player.IsChoosingOtherPlayer || player.IsChoosingOwnState || player.IsChoosingMenuState;
+        Debug.Log("POINTER ENABLED " + pointerEnabled);
         if (pointerEnabled != gameObject.activeSelf) {
             gameObject.SetActive(pointerEnabled);
         }

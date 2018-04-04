@@ -7,7 +7,6 @@ public class PlayerController : MonoBehaviour, IGlobalTriggerPressDownHandler {
 
     public TextMesh gameStatusTextObject;
     public int Number;
-    private int Index;
 
     public PlayerController chosenOtherPlayer { get; set; }
     public StateController chosenStateController { get; set; }
@@ -15,23 +14,22 @@ public class PlayerController : MonoBehaviour, IGlobalTriggerPressDownHandler {
     public State CurrentState { get; set; }
     public State DismissState { get; set; }
 
-    public bool IsBroadcasting { get; set; }
-    public bool IsEndingTurn { get; set; }
     public bool IsDoingTurn { get; set; }
     public bool IsChoosingOtherPlayer { get; set; }
     public bool IsChoosingOwnState { get; set; }
     public bool IsChoosingMenuState { get; set; }
     public bool Immune { get; set; }
-
     public bool AllowChooseSelf { get; set; }
 
     private string[] statusDelim = new string[] { "\n>>" };
 
     void Start() {
-        Index = Number - 1;
     }
 
     #region General Player Methods
+    public string GetName() {
+        return "Player " + Number;
+    }
     public string GetGameStatus() {
         string[] split = gameStatusTextObject.text.Split(statusDelim, System.StringSplitOptions.None);
         if (split.Length == 1) {
@@ -43,8 +41,7 @@ public class PlayerController : MonoBehaviour, IGlobalTriggerPressDownHandler {
     }
 
     public void SetGameStatus(string newStatus) {
-        string currentStatus = gameStatusTextObject.text;
-        string[] split = currentStatus.Split(statusDelim, System.StringSplitOptions.None);
+        string[] split = gameStatusTextObject.text.Split(statusDelim, System.StringSplitOptions.None);
         if (split.Length == 2) {
             newStatus = split[1] + "\n>>" + newStatus;
         }
@@ -54,8 +51,8 @@ public class PlayerController : MonoBehaviour, IGlobalTriggerPressDownHandler {
         gameStatusTextObject.text = newStatus;
     }
 
-    public void Die(string text) {
-        SetGameStatus(text);
+    public void Die(string status) {
+        SetGameStatus(status);
         CurrentState = State.Dead;
     }
     #endregion
@@ -65,7 +62,7 @@ public class PlayerController : MonoBehaviour, IGlobalTriggerPressDownHandler {
     {
         if (!Holojam.Tools.BuildManager.IsMasterClient()) return;
         if (eventData.currentRaycast == null) return;
-
+        Debug.Log("" + IsChoosingOtherPlayer + IsChoosingOwnState + IsChoosingMenuState);
         if (IsChoosingOtherPlayer) {
             PlayerController otherPlayerController = eventData.currentRaycast.GetComponent<PlayerController> ();
             Debug.Log ("Pointing at " + otherPlayerController);
