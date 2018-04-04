@@ -23,13 +23,14 @@ public class GameMasterSync : Synchronizable {
 	}
 
 	public override void ResetData() {
-		data = new Holojam.Network.Flake(0, 0, 0, 22, 0, true);
+		data = new Holojam.Network.Flake(0, 0, 0, 24, 0, true);
 	}
 		
 	//0-15 is the deck
 	//16 is the nextStateIdx
 	//17-20 is the player current states
 	//21 is the currentPlayerIdx
+    //22-23 are the TwoStateMenu states to display
     
     //text is game status of players separated by "_"
 
