@@ -6,5 +6,8 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/LoveLetter.unity
+    path: Assets/Introduction.unity
+    guid: 5230c9a4dd6ede24ba5f56cae64d26c1
+  - enabled: 1
+    path: Assets/LoveLetterGame.unity
     guid: 1739eb7cdd382814e9c5cffc30ba9813
