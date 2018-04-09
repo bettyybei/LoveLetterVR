@@ -5,19 +5,15 @@ using FRL.IO;
 
 public class IntroPlayerController : MonoBehaviour, IGlobalTriggerPressDownHandler {
 
-	// Use this for initialization
-	void Start () {
-		
-	}
-	
-	// Update is called once per frame
 	void Update () {
-		
+		if (Holojam.Tools.BuildManager.IsMasterClient()) {
+            if (Input.GetKeyDown("space")) {
+                SceneManager.LoadScene("LoveLetterGame");
+            }
+        }
 	}
 
     public void OnGlobalTriggerPressDown(XREventData eventData) {
-        Debug.Log("Trigger Press");
-        if (Holojam.Tools.BuildManager.IsMasterClient()) return;
         SceneManager.LoadScene("LoveLetterGame");
     }
 }
