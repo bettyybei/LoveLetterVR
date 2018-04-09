@@ -5,10 +5,14 @@ public class PointerController : MonoBehaviour {
     public PlayerController player1;
     public PlayerController player2;
 
+    MeshRenderer pointerRenderer;
     private PlayerController player;
 
 	void Start () {
-		switch(Holojam.Tools.BuildManager.BUILD_INDEX) {
+        pointerRenderer = gameObject.GetComponentsInChildren<MeshRenderer>()[0];
+        pointerRenderer.enabled = false;
+
+        switch (Holojam.Tools.BuildManager.BUILD_INDEX) {
             case 1:
                 player = player1;
                 break;
@@ -24,9 +28,8 @@ public class PointerController : MonoBehaviour {
 	void Update () {
         if (!player) return;
         bool pointerEnabled = player.IsChoosingOtherPlayer || player.IsChoosingOwnState || player.IsChoosingMenuState;
-        Debug.Log("POINTER ENABLED " + pointerEnabled);
-        if (pointerEnabled != gameObject.activeSelf) {
-            gameObject.SetActive(pointerEnabled);
+        if (pointerEnabled != pointerRenderer.enabled) {
+            pointerRenderer.enabled = pointerEnabled;
         }
     }
 }
