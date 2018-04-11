@@ -30,10 +30,15 @@ public class ParticleController : MonoBehaviour {
 
     void Update() {
         if (!player) return;
-        particleSystemObject.Stop();
         if (_GameStatusWin.Equals(player.GetGameStatus())) {
             Debug.Log("Enabling Particles");
             particleSystemObject.Play();
+        }
+        else {
+            if (particleSystemObject.isPlaying) {
+                Debug.Log("Stopping Particles");
+                particleSystemObject.Stop();
+            }
         }
     }
 }

@@ -225,6 +225,11 @@ public class GameMaster: MonoBehaviour {
                 break;
             case State.Handmaid:
                 player.SetGameStatus("You are immune until your next turn");
+                foreach(PlayerController p in players) {
+                    if (p != player && p.CurrentState != State.Dead) {
+                        p.SetGameStatus(player.GetName() + " is immune until their next turn");
+                    }
+                }
                 player.Immune = true;
                 break;
             case State.Prince:
@@ -235,9 +240,14 @@ public class GameMaster: MonoBehaviour {
                 break;
             case State.Countess:
                 player.SetGameStatus("You dismissed the Countess. No powers are enacted");
+                foreach (PlayerController p in players) {
+                    if (p != player && p.CurrentState != State.Dead) {
+                        p.SetGameStatus(player.GetName() + " dismissed the Countess");
+                    }
+                }
                 break;
             case State.Princess:
-                player.Die("You dismissed the Princess and she's very angry. You are out of the round");
+                PlayerDie(player, "You dismissed the Princess and she's very angry. You are out of the round");
                 break;
         }
         player.IsDoingTurn = false;
@@ -298,18 +308,27 @@ public class GameMaster: MonoBehaviour {
     }
     #endregion
 
+    void PlayerDie(PlayerController player, string gameStatus) {
+        player.Die(gameStatus);
+        foreach (PlayerController p in players) {
+            if (p != player) {
+                p.SetGameStatus(player.GetName() + " is out of this round!");
+            }
+        }
+    }
+
     #region Character Actions
     IEnumerator GuardAttack() {
         PlayerController player = players[currentPlayerIdx];
         State guess = player.chosenStateController.GetState();
 
-        player.SetGameStatus(_ChooseAnotherPlayerText + "you want to attack");
+        player.SetGameStatus(_ChooseAnotherPlayerText + "you want believe has a " + guess);
         yield return StartCoroutine(ChooseOtherPlayer());
         if (player.chosenOtherPlayer != null) {
             if (player.chosenOtherPlayer.CurrentState == guess) {
                 //success
                 player.SetGameStatus("You guessed correct! " + player.GetName() + " is out");
-                player.chosenOtherPlayer.Die(player.GetName() + " used a guard and guessed correctly. You are out!");
+                PlayerDie(player.chosenOtherPlayer, player.GetName() + " used a guard and guessed correctly. You are out!");
             } else {
                 //fail
                 player.SetGameStatus("You guessed incorrectly. " + player.GetName() + " is still in the game");
@@ -336,11 +355,11 @@ public class GameMaster: MonoBehaviour {
         if (player.chosenOtherPlayer != null) {
             if (player.chosenOtherPlayer.CurrentState < player.CurrentState) {
                 //success
+                PlayerDie(player.chosenOtherPlayer, player.GetName() + " used a Baron and beat your " + player.chosenOtherPlayer.CurrentState + " in battle. You are out!");
                 player.SetGameStatus("You beat " + player.GetName() + "'s " + player.chosenOtherPlayer.CurrentState + " in battle");
-                player.chosenOtherPlayer.Die(player.GetName() + " used a Baron and beat your " + player.chosenOtherPlayer.CurrentState + " in battle. You are out!");
             } else if (player.chosenOtherPlayer.CurrentState > player.CurrentState) {
                 //fail
-                player.Die(player.GetName() + " has a " + player.chosenOtherPlayer.CurrentState + ". You are out");
+                PlayerDie(player, player.chosenOtherPlayer.GetName() + " has a " + player.chosenOtherPlayer.CurrentState + ". You are out");
             } else {
                 //tie
                 player.SetGameStatus(player.GetName() + " has a " + player.chosenOtherPlayer.CurrentState + ". You two tied");
