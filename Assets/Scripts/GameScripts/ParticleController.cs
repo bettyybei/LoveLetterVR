@@ -7,13 +7,13 @@ public class ParticleController : MonoBehaviour {
     public PlayerController player1;
     public PlayerController player2;
 
-    MeshRenderer particleRenderer;
+    ParticleSystem particleSystemObject;
     private PlayerController player;
     const string _GameStatusWin = "Game over. You win!";
 
     void Start() {
-        particleRenderer = gameObject.GetComponent<MeshRenderer>();
-        particleRenderer.enabled = false;
+        particleSystemObject = gameObject.GetComponent<ParticleSystem>();
+        particleSystemObject.Stop();
 
         switch (Holojam.Tools.BuildManager.BUILD_INDEX) {
             case 1:
@@ -30,9 +30,10 @@ public class ParticleController : MonoBehaviour {
 
     void Update() {
         if (!player) return;
-        Debug.Log("game status " + player.GetGameStatus());
+        particleSystemObject.Stop();
         if (_GameStatusWin.Equals(player.GetGameStatus())) {
-            particleRenderer.enabled = true;
+            Debug.Log("Enabling Particles");
+            particleSystemObject.Play();
         }
     }
 }

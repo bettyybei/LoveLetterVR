@@ -29,6 +29,7 @@ public class PointerController : MonoBehaviour {
         if (!player) return;
         bool pointerEnabled = player.IsChoosingOtherPlayer || player.IsChoosingOwnState || player.IsChoosingMenuState;
         if (pointerEnabled != pointerRenderer.enabled) {
+            Debug.Log("Toggling Pointer");
             pointerRenderer.enabled = pointerEnabled;
         }
     }
