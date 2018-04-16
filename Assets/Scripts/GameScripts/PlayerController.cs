@@ -1,9 +1,10 @@
 ﻿using UnityEngine;
+using UnityEngine.SceneManagement;
 using FRL.IO;
 using State = GameMaster.State;
 [RequireComponent(typeof(Receiver))]
 
-public class PlayerController : MonoBehaviour, IGlobalTriggerPressDownHandler {
+public class PlayerController : MonoBehaviour, IGlobalTriggerPressDownHandler, IGlobalTouchpadPressDownHandler {
 
     public TextMesh gameStatusTextObject;
     public int Number;
@@ -60,25 +61,29 @@ public class PlayerController : MonoBehaviour, IGlobalTriggerPressDownHandler {
     #region Vive Controller Methods
     public void OnGlobalTriggerPressDown(XREventData eventData)
     {
+        SceneManager.LoadScene("Introduction");
+    }
+
+    public void OnGlobalTouchpadPressDown(XREventData eventData) {
         if (!Holojam.Tools.BuildManager.IsMasterClient()) return;
         if (eventData.currentRaycast == null) return;
         Debug.Log("" + IsChoosingOtherPlayer + IsChoosingOwnState + IsChoosingMenuState);
         if (IsChoosingOtherPlayer) {
-            PlayerController otherPlayerController = eventData.currentRaycast.GetComponent<PlayerController> ();
-            Debug.Log ("Pointing at " + otherPlayerController);
+            PlayerController otherPlayerController = eventData.currentRaycast.GetComponent<PlayerController>();
+            Debug.Log("Pointing at " + otherPlayerController);
             if (otherPlayerController != null && otherPlayerController.Immune) {
                 SetGameStatus("That player is immune");
                 return;
             }
             if (otherPlayerController != null) {
-                if (AllowChooseSelf || otherPlayerController != this ) {
+                if (AllowChooseSelf || otherPlayerController != this) {
                     chosenOtherPlayer = otherPlayerController;
                 }
             }
         } else if (IsChoosingOwnState || IsChoosingMenuState) {
-            
-            StateController otherStateController = eventData.currentRaycast.GetComponent<StateController> ();
-            Debug.Log ("Pointing at state: " + otherStateController.GetState());
+
+            StateController otherStateController = eventData.currentRaycast.GetComponent<StateController>();
+            Debug.Log("Pointing at state: " + otherStateController.GetState());
             if (otherStateController != null) {
                 chosenStateController = otherStateController;
 
