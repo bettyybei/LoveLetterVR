@@ -61,6 +61,7 @@ public class PlayerController : MonoBehaviour, IGlobalTriggerPressDownHandler, I
     #region Vive Controller Methods
     public void OnGlobalTriggerPressDown(XREventData eventData)
     {
+        if (Holojam.Tools.BuildManager.IsMasterClient()) return;
         SceneManager.LoadScene("Introduction");
     }
 
