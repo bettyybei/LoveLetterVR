@@ -6,7 +6,7 @@ using FRL.IO;
 public class IntroPlayerController : MonoBehaviour, IGlobalTriggerPressDownHandler, IGlobalTouchpadPressDownHandler {
 
     public Renderer ScrollRenderer;
-    private int i = 1;
+    private int i = 0;
 
 	void Update () {
 		if (Holojam.Tools.BuildManager.IsMasterClient()) {
