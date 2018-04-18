@@ -23,7 +23,7 @@ public class GameMasterSync : Synchronizable {
 	}
 
 	public override void ResetData() {
-		data = new Holojam.Network.Flake(0, 0, 0, 24, 0, true);
+		data = new Holojam.Network.Flake(0, 0, 0, 28, 0, true);
 	}
 		
 	//0-15 is the deck
@@ -31,6 +31,7 @@ public class GameMasterSync : Synchronizable {
 	//17-20 is the player current states
 	//21 is the currentPlayerIdx
     //22-23 are the TwoStateMenu states to display
+    //24-27 is players 'ShowInstructions'
     
     //text is game status of players separated by "_"
 
@@ -49,6 +50,12 @@ public class GameMasterSync : Synchronizable {
 		data.ints[i++] = master.currentPlayerIdx;
         data.ints[i++] = (int) master.stateCard1.GetState();
         data.ints[i++] = (int) master.stateCard2.GetState();
+        for (int j = 0; j < 4; j++) {
+            if (j < master.players.Length) {
+                data.ints[i] = master.players[j].InstructionNum;
+            }
+            i++;
+        }
 
         StringBuilder sb = new StringBuilder();
         for (int j = 0; j < master.players.Length; j++) {
@@ -73,6 +80,12 @@ public class GameMasterSync : Synchronizable {
 		master.currentPlayerIdx = data.ints[i++];
         master.stateCard1.SetState((State) data.ints[i++]);
         master.stateCard2.SetState((State) data.ints[i++]);
+        for (int j = 0; j < 4; j++) {
+            if (j < master.players.Length) {
+                master.players[j].InstructionNum = data.ints[i];
+            }
+            i++;
+        }
 
         string[] gameStatusTexts = data.text.Split('_');
         for (int j = 0; j < (gameStatusTexts.Length - 1); j++) {

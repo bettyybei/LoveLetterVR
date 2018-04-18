@@ -37,7 +37,7 @@ public class StateTextController : MonoBehaviour {
             stateText = "Out of the round";
         }
         else {
-            stateText = "Currently Holding: " + player.CurrentState;
+            stateText = "" + player.CurrentState;
         }
         
         if (!textMesh.text.Equals(stateText)) {

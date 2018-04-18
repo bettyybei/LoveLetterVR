@@ -15,6 +15,7 @@ public class PlayerController : MonoBehaviour, IGlobalTriggerPressDownHandler, I
     public State CurrentState { get; set; }
     public State DismissState { get; set; }
 
+    public int InstructionNum { get; set; }
     public bool IsDoingTurn { get; set; }
     public bool IsChoosingOtherPlayer { get; set; }
     public bool IsChoosingOwnState { get; set; }
@@ -25,6 +26,7 @@ public class PlayerController : MonoBehaviour, IGlobalTriggerPressDownHandler, I
     private string[] statusDelim = new string[] { "\n>>" };
 
     void Start() {
+        InstructionNum = 0;
     }
 
     #region General Player Methods
@@ -61,33 +63,46 @@ public class PlayerController : MonoBehaviour, IGlobalTriggerPressDownHandler, I
     #region Vive Controller Methods
     public void OnGlobalTriggerPressDown(XREventData eventData)
     {
-        if (Holojam.Tools.BuildManager.IsMasterClient()) return;
-        SceneManager.LoadScene("Introduction");
+        Debug.Log("trigger press");
+        if (Holojam.Tools.BuildManager.IsMasterClient()) {
+            if ((InstructionNum == -1)) {
+                InstructionNum = 0;
+            } else {
+                InstructionNum = -1;
+            }
+        }
     }
 
     public void OnGlobalTouchpadPressDown(XREventData eventData) {
         if (!Holojam.Tools.BuildManager.IsMasterClient()) return;
-        if (eventData.currentRaycast == null) return;
-        Debug.Log("" + IsChoosingOtherPlayer + IsChoosingOwnState + IsChoosingMenuState);
-        if (IsChoosingOtherPlayer) {
-            PlayerController otherPlayerController = eventData.currentRaycast.GetComponent<PlayerController>();
-            Debug.Log("Pointing at " + otherPlayerController);
-            if (otherPlayerController != null && otherPlayerController.Immune) {
-                SetGameStatus("That player is immune");
-                return;
-            }
-            if (otherPlayerController != null) {
-                if (AllowChooseSelf || otherPlayerController != this) {
-                    chosenOtherPlayer = otherPlayerController;
+        Debug.Log("touchpad press");
+        if (InstructionNum != -1) {
+            Debug.Log("Switching instructions");
+            InstructionNum = (InstructionNum + 1) % 4;
+        } else {
+            Debug.Log("Raycasting");
+            if (eventData.currentRaycast == null) return;
+            Debug.Log("" + IsChoosingOtherPlayer + IsChoosingOwnState + IsChoosingMenuState);
+            if (IsChoosingOtherPlayer) {
+                PlayerController otherPlayerController = eventData.currentRaycast.GetComponent<PlayerController>();
+                Debug.Log("Pointing at " + otherPlayerController);
+                if (otherPlayerController != null && otherPlayerController.Immune) {
+                    SetGameStatus("That player is immune");
+                    return;
                 }
-            }
-        } else if (IsChoosingOwnState || IsChoosingMenuState) {
+                if (otherPlayerController != null) {
+                    if (AllowChooseSelf || otherPlayerController != this) {
+                        chosenOtherPlayer = otherPlayerController;
+                    }
+                }
+            } else if (IsChoosingOwnState || IsChoosingMenuState) {
 
-            StateController otherStateController = eventData.currentRaycast.GetComponent<StateController>();
-            Debug.Log("Pointing at state: " + otherStateController.GetState());
-            if (otherStateController != null) {
-                chosenStateController = otherStateController;
+                StateController otherStateController = eventData.currentRaycast.GetComponent<StateController>();
+                Debug.Log("Pointing at state: " + otherStateController.GetState());
+                if (otherStateController != null) {
+                    chosenStateController = otherStateController;
 
+                }
             }
         }
     }

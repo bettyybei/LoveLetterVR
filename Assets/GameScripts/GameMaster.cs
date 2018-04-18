@@ -84,7 +84,6 @@ public class GameMaster: MonoBehaviour {
         PlayerController currentPlayer = players[currentPlayerIdx];
         if (nextStateIdx > 16) return;
 
-
         if (Holojam.Tools.BuildManager.IsMasterClient()) {
 
             // Space key press for testing purposes
