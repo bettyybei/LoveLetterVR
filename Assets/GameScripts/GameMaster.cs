@@ -84,6 +84,13 @@ public class GameMaster: MonoBehaviour {
         PlayerController currentPlayer = players[currentPlayerIdx];
         if (nextStateIdx > 16) return;
 
+        // Show menus based on what the player is currently choosing
+        if (currentPlayer.IsChoosingOwnState != twoStateMenuObject.activeSelf) {
+            twoStateMenuObject.SetActive(currentPlayer.IsChoosingOwnState);
+        } else if (currentPlayer.IsChoosingMenuState != stateMenuObject.activeSelf) {
+            stateMenuObject.SetActive(currentPlayer.IsChoosingMenuState);
+        }
+
         if (Holojam.Tools.BuildManager.IsMasterClient()) {
 
             // Space key press for testing purposes
@@ -170,11 +177,11 @@ public class GameMaster: MonoBehaviour {
                 // currentPlayer is me
 
                 // Show menus based on what the player is currently choosing
-                if (currentPlayer.IsChoosingOwnState != twoStateMenuObject.activeSelf) {
-                    twoStateMenuObject.SetActive(currentPlayer.IsChoosingOwnState);
-                } else if (currentPlayer.IsChoosingMenuState != stateMenuObject.activeSelf) {
-                    stateMenuObject.SetActive(currentPlayer.IsChoosingMenuState);
-                }
+                //if (currentPlayer.IsChoosingOwnState != twoStateMenuObject.activeSelf) {
+                //    twoStateMenuObject.SetActive(currentPlayer.IsChoosingOwnState);
+                //} else if (currentPlayer.IsChoosingMenuState != stateMenuObject.activeSelf) {
+                //    stateMenuObject.SetActive(currentPlayer.IsChoosingMenuState);
+                //}
             } else {
                 // currentPlayer is not me
                 if (twoStateMenuObject.activeSelf != false) twoStateMenuObject.SetActive(false);

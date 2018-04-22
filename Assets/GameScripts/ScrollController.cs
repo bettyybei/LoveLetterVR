@@ -19,6 +19,7 @@ public class ScrollController : MonoBehaviour {
                 player = player2;
                 break;
             default:
+                scrollRenderer.enabled = false;
                 Debug.Log("ERROR IN SCROLL CONTROLLER");
                 break;
         }

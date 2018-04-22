@@ -61,9 +61,9 @@ public class PlayerController : MonoBehaviour, IGlobalTriggerPressDownHandler, I
     #endregion
 
     #region Vive Controller Methods
-    public void OnGlobalTriggerPressDown(XREventData eventData)
+    public void OnGlobalTouchpadPressDown(XREventData eventData)
     {
-        Debug.Log("trigger press");
+        Debug.Log("touchpad press");
         if (Holojam.Tools.BuildManager.IsMasterClient()) {
             if ((InstructionNum == -1)) {
                 InstructionNum = 0;
@@ -73,9 +73,9 @@ public class PlayerController : MonoBehaviour, IGlobalTriggerPressDownHandler, I
         }
     }
 
-    public void OnGlobalTouchpadPressDown(XREventData eventData) {
+    public void OnGlobalTriggerPressDown(XREventData eventData) {
         if (!Holojam.Tools.BuildManager.IsMasterClient()) return;
-        Debug.Log("touchpad press");
+        Debug.Log("trigger press");
         if (InstructionNum != -1) {
             Debug.Log("Switching instructions");
             InstructionNum = (InstructionNum + 1) % 4;
