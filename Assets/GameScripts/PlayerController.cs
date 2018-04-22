@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using UnityEngine.SceneManagement;
 using FRL.IO;
 using State = GameMaster.State;
 [RequireComponent(typeof(Receiver))]
@@ -22,7 +21,6 @@ public class PlayerController : MonoBehaviour, IGlobalTriggerPressDownHandler, I
     public bool IsChoosingMenuState { get; set; }
     public bool Immune { get; set; }
     public bool AllowChooseSelf { get; set; }
-
 
     private string[] statusDelim = new string[] { "\n>>" };
 

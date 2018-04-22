@@ -20,7 +20,7 @@ public class GameStatusTextController : MonoBehaviour {
                 player = player2;
                 break;
             default:
-                Debug.Log("Master Game Status Text");
+                Debug.Log("MASTER Game Status Text");
                 break;
         }
     }

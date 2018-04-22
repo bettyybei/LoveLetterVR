@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class ParticleController : MonoBehaviour {
 
@@ -23,7 +21,7 @@ public class ParticleController : MonoBehaviour {
                 player = player2;
                 break;
             default:
-                Debug.Log("ERROR IN POINTER");
+                Debug.Log("ERROR IN PARTICLE CONTROLLER");
                 break;
         }
     }
@@ -32,7 +30,7 @@ public class ParticleController : MonoBehaviour {
         if (!player) return;
         if (_GameStatusWin.Equals(player.GetGameStatus())) {
             Debug.Log("Enabling Particles");
-            particleSystemObject.Play();
+            if (!particleSystemObject.isPlaying) particleSystemObject.Play();
         }
         else {
             if (particleSystemObject.isPlaying) {
