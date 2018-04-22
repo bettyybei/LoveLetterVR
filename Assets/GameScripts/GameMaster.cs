@@ -69,15 +69,15 @@ public class GameMaster: MonoBehaviour {
             // Start first player's turn
             StartPlayersTurn(deck[nextStateIdx++]);
         }
-        else {
-            for (int i = 0; i < currentPlayerCount; i++) {
-                if (Holojam.Tools.BuildManager.BUILD_INDEX - 1 == i) {
-                    players[i].gameStatusTextObject.gameObject.SetActive(true);
-                } else {
-                    players[i].gameStatusTextObject.gameObject.SetActive(false);
-                }
-            }
-        }
+        //else {
+        //    for (int i = 0; i < currentPlayerCount; i++) {
+        //        if (Holojam.Tools.BuildManager.BUILD_INDEX - 1 == i) {
+        //            players[i].gameStatusTextObject.gameObject.SetActive(true);
+        //        } else {
+        //            players[i].gameStatusTextObject.gameObject.SetActive(false);
+        //        }
+        //    }
+        //}
     }
 
     void Update () {

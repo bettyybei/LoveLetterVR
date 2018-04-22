@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Text;
+using UnityEngine;
 
 public class GameStatusTextController : MonoBehaviour {
 
@@ -19,15 +20,22 @@ public class GameStatusTextController : MonoBehaviour {
                 player = player2;
                 break;
             default:
-                Debug.Log("ERROR IN GAME STATUS STATE TEXT");
+                Debug.Log("Master Game Status Text");
                 break;
         }
     }
     void Update() {
-        if (!player) return;
-        string currentStatus = player.GetGameStatus();
-        if (previousFrameStatus.Equals(currentStatus)) return;
-        previousFrameStatus = currentStatus;
-        textMesh.text = currentStatus;
+        if (!player) {
+            StringBuilder sb = new StringBuilder();
+            sb.Append(player1.GameStatusText).Append("\n");
+            sb.Append(player2.GameStatusText).Append("\n");
+            textMesh.text = sb.ToString();
+        }
+        else {
+            string currentStatus = player.GameStatusText;
+            if (previousFrameStatus.Equals(currentStatus)) return;
+            previousFrameStatus = currentStatus;
+            textMesh.text = currentStatus;
+        }
     }
 }

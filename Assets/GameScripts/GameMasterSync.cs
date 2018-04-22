@@ -59,7 +59,7 @@ public class GameMasterSync : Synchronizable {
 
         StringBuilder sb = new StringBuilder();
         for (int j = 0; j < master.players.Length; j++) {
-            sb.Append(master.players[j].gameStatusTextObject.text).Append("_");
+            sb.Append(master.players[j].GameStatusText).Append("_");
         }
         data.text = sb.ToString();
 	}
@@ -89,7 +89,7 @@ public class GameMasterSync : Synchronizable {
 
         string[] gameStatusTexts = data.text.Split('_');
         for (int j = 0; j < (gameStatusTexts.Length - 1); j++) {
-            master.players[j].gameStatusTextObject.text = gameStatusTexts[j];
+            master.players[j].GameStatusText = gameStatusTexts[j];
         }
 	}
 

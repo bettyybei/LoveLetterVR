@@ -6,7 +6,6 @@ using State = GameMaster.State;
 
 public class PlayerController : MonoBehaviour, IGlobalTriggerPressDownHandler, IGlobalTouchpadPressDownHandler {
 
-    public TextMesh gameStatusTextObject;
     public int Number;
 
     public PlayerController chosenOtherPlayer { get; set; }
@@ -15,6 +14,7 @@ public class PlayerController : MonoBehaviour, IGlobalTriggerPressDownHandler, I
     public State CurrentState { get; set; }
     public State DismissState { get; set; }
 
+    public string GameStatusText = "";
     public int InstructionNum { get; set; }
     public bool IsDoingTurn { get; set; }
     public bool IsChoosingOtherPlayer { get; set; }
@@ -22,6 +22,7 @@ public class PlayerController : MonoBehaviour, IGlobalTriggerPressDownHandler, I
     public bool IsChoosingMenuState { get; set; }
     public bool Immune { get; set; }
     public bool AllowChooseSelf { get; set; }
+
 
     private string[] statusDelim = new string[] { "\n>>" };
 
@@ -34,7 +35,7 @@ public class PlayerController : MonoBehaviour, IGlobalTriggerPressDownHandler, I
         return "Player " + Number;
     }
     public string GetGameStatus() {
-        string[] split = gameStatusTextObject.text.Split(statusDelim, System.StringSplitOptions.None);
+        string[] split = GameStatusText.Split(statusDelim, System.StringSplitOptions.None);
         if (split.Length == 1) {
             return split[0];
         }
@@ -44,14 +45,14 @@ public class PlayerController : MonoBehaviour, IGlobalTriggerPressDownHandler, I
     }
 
     public void SetGameStatus(string newStatus) {
-        string[] split = gameStatusTextObject.text.Split(statusDelim, System.StringSplitOptions.None);
+        string[] split = GameStatusText.Split(statusDelim, System.StringSplitOptions.None);
         if (split.Length == 2) {
             newStatus = split[1] + "\n>>" + newStatus;
         }
         else {
             newStatus = "\n>>" + newStatus;
         }
-        gameStatusTextObject.text = newStatus;
+        GameStatusText = newStatus;
     }
 
     public void Die(string status) {
