@@ -4,39 +4,37 @@ public class SwordController : MonoBehaviour {
 
     public PlayerController player1;
     public PlayerController player2;
-    public MeshRenderer player1Sword;
-    public MeshRenderer player2Sword;
+    public PlayerController player3;
+    public MeshRenderer player1SwordRenderer;
+    public MeshRenderer player2SwordRenderer;
+    public MeshRenderer player3SwordRenderer;
 
-    private MeshRenderer swordGlowRenderer;
     private PlayerController player;
+    private MeshRenderer swordGlowRenderer;
     private MeshRenderer swordRenderer;
 
 	void Start () {
         swordGlowRenderer = gameObject.GetComponentsInChildren<MeshRenderer>()[0];
         swordGlowRenderer.enabled = false;
 
-        switch (Holojam.Tools.BuildManager.BUILD_INDEX) {
-            case 1:
-                player = player1;
-                swordRenderer = player1Sword;
-                break;
-            case 2:
-                player = player2;
-                swordRenderer = player2Sword;
-                break;
-            default:
-                Debug.Log("ERROR IN SWORD CONTROLLER");
-                break;
-        }
+        PlayerController[] players = new PlayerController[] {
+            null, player1, player2, player3
+        };
+        MeshRenderer[] swordRenderers = new MeshRenderer[] {
+            null, player1SwordRenderer, player2SwordRenderer, player3SwordRenderer
+        };
+
+        player = players[Holojam.Tools.BuildManager.BUILD_INDEX];
+        swordRenderer = swordRenderers[Holojam.Tools.BuildManager.BUILD_INDEX];
     }
 	
 	void Update () {
         if (!player) return;
-        bool pointerEnabled = player.IsChoosingOtherPlayer || player.IsChoosingOwnState || player.IsChoosingMenuState;
-        if (pointerEnabled != swordGlowRenderer.enabled) {
-            Debug.Log("Toggling Sword Glow");
-            swordGlowRenderer.enabled = pointerEnabled;
-            swordRenderer.enabled = !pointerEnabled;
+        bool glowEnabled = player.IsChoosingOtherPlayer || player.IsChoosingOwnState || player.IsChoosingMenuState;
+        if (glowEnabled != swordGlowRenderer.enabled) {
+            Debug.Log("Toggling Sword Glow " + glowEnabled);
+            swordGlowRenderer.enabled = glowEnabled;
+            swordRenderer.enabled = !glowEnabled;
         }
     }
 }

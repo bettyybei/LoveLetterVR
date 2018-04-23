@@ -4,32 +4,25 @@ public class ScrollController : MonoBehaviour {
 
     public PlayerController player1;
     public PlayerController player2;
-
-    private Renderer scrollRenderer;
+    public PlayerController player3;
+    
     private PlayerController player;
+    private Renderer scrollRenderer;
     private int previousInstructionNum;
 
     void Start () {
         scrollRenderer = GetComponent<Renderer>();
-        switch (Holojam.Tools.BuildManager.BUILD_INDEX) {
-            case 1:
-                player = player1;
-                break;
-            case 2:
-                player = player2;
-                break;
-            default:
-                scrollRenderer.enabled = false;
-                Debug.Log("ERROR IN SCROLL CONTROLLER");
-                break;
-        }
+        PlayerController[] players = new PlayerController[] {
+            null, player1, player2, player3
+        };
+        player = players[Holojam.Tools.BuildManager.BUILD_INDEX];
+        if (!player) scrollRenderer.enabled = false;
     }
 	
 	void Update () {
-        if (!player) return;
-        if (previousInstructionNum == player.InstructionNum) return;
+        if (!player || previousInstructionNum == player.InstructionNum) return;
         previousInstructionNum = player.InstructionNum;
-        if (player.InstructionNum == -1) {
+        if (player.InstructionNum == -1) { // -1 means instructions are closed
             scrollRenderer.enabled = false;
         } else {
             scrollRenderer.enabled = true;

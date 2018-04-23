@@ -1,47 +1,33 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using State = GameMaster.State;
 
 public class StateTextController : MonoBehaviour {
 
     public PlayerController player1;
     public PlayerController player2;
-
+    public PlayerController player3;
+    
+    private PlayerController player;
     private State previousFrameState;
     private TextMesh textMesh;
-    private PlayerController player;
 
     void Start() {
         textMesh = GetComponent<TextMesh>();
-        switch (Holojam.Tools.BuildManager.BUILD_INDEX) {
-            case 1:
-                player = player1;
-                break;
-            case 2:
-                player = player2;
-                break;
-            default:
-                Debug.Log("ERROR IN STATE TEXT");
-                break;
-        }
+        PlayerController[] players = new PlayerController[] {
+            null, player1, player2, player3
+        };
+        player = players[Holojam.Tools.BuildManager.BUILD_INDEX];
     }
 
-    // Update is called once per frame
     void Update () {
-        if (!player) return;
-        if (previousFrameState == player.CurrentState) return;
+        if (!player || previousFrameState == player.CurrentState) return;
         previousFrameState = player.CurrentState;
-        string stateText = "";
+        string newStateText = "";
         if (player.CurrentState == State.Dead) {
-            stateText = "Out of the round";
+            newStateText = "Out of the round";
+        } else {
+            newStateText = player.CurrentState.ToString();
         }
-        else {
-            stateText = "" + player.CurrentState;
-        }
-        
-        if (!textMesh.text.Equals(stateText)) {
-            textMesh.text = stateText;
-        }
+        textMesh.text = newStateText;
 	}
 }

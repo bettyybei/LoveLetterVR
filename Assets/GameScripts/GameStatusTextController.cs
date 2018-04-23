@@ -5,30 +5,26 @@ public class GameStatusTextController : MonoBehaviour {
 
     public PlayerController player1;
     public PlayerController player2;
+    public PlayerController player3;
 
+    private PlayerController[] players;
+    private PlayerController player;
     private string previousFrameStatus = "";
     private TextMesh textMesh;
-    private PlayerController player;
 
     void Start() {
         textMesh = GetComponent<TextMesh>();
-        switch (Holojam.Tools.BuildManager.BUILD_INDEX) {
-            case 1:
-                player = player1;
-                break;
-            case 2:
-                player = player2;
-                break;
-            default:
-                Debug.Log("MASTER Game Status Text");
-                break;
-        }
+        players = new PlayerController[] {
+            null, player1, player2, player3
+        };
+        player = players[Holojam.Tools.BuildManager.BUILD_INDEX];
     }
     void Update() {
         if (!player) {
             StringBuilder sb = new StringBuilder();
-            sb.Append(player1.GameStatusText).Append("\n");
-            sb.Append(player2.GameStatusText).Append("\n");
+            for (int i = 1; i < players.Length; i++) {
+                sb.Append(players[i].CurrentState).Append("\n").Append(players[i].GameStatusText).Append("\n");
+            }
             textMesh.text = sb.ToString();
         }
         else {

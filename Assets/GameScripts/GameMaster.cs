@@ -9,6 +9,7 @@ public class GameMaster: MonoBehaviour {
 
     public PlayerController player1;
     public PlayerController player2;
+    public PlayerController player3;
 
     public GameObject stateMenuObject;
     public GameObject twoStateMenuObject;
@@ -56,7 +57,7 @@ public class GameMaster: MonoBehaviour {
         }
 
         players = new PlayerController[] {
-            player1, player2
+            player1, player2, player3
         };
 
         currentPlayerCount = players.Length;
