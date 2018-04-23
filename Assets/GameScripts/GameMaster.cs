@@ -22,7 +22,7 @@ public class GameMaster: MonoBehaviour {
     const string _GameStatusLose = "Game over. You lost.";
     const string _GameStatusTie = "Game over. It was a tie!";
     const string _ChooseOwnStateText = "Choose a card you would like to discard and enact its power";
-    const string _ChooseOtherPlayerStateText = "Choose a state you believe another player has";
+    const string _ChooseOtherPlayerStateText = "Choose a card you think another player is holding";
     const string _ChooseAnotherPlayerText = "Choose another player ";
 
     public State[] deck = new State[] {
@@ -40,10 +40,10 @@ public class GameMaster: MonoBehaviour {
     public int currentPlayerIdx = 0;
 
     void Start () {
-        // Populate State Menu State Controllers
+        // Populate State Controllers
         StateController[] menuStateControllers = stateMenuObject.GetComponentsInChildren<StateController>();
         for (int i = 0; i < menuStateControllers.Length; i++) {
-            menuStateControllers[i].SetState((State)(i + 1));
+            menuStateControllers[i].SetState((State)(i + 2));
         }
         StateController[] cardStateControllers = twoStateMenuObject.GetComponentsInChildren<StateController>();
         stateCard1 = cardStateControllers[0];
@@ -218,7 +218,7 @@ public class GameMaster: MonoBehaviour {
 
         switch (player.DismissState) {
             case State.Guard:
-                yield return StartCoroutine(ChooseOtherPlayerState());
+                yield return StartCoroutine(ChooseMenuState());
                 yield return StartCoroutine(GuardAttack());
                 break;
             case State.Priest:
@@ -275,7 +275,7 @@ public class GameMaster: MonoBehaviour {
         }
     }
 
-    IEnumerator ChooseOtherPlayerState() {
+    IEnumerator ChooseMenuState() {
         PlayerController player = players[currentPlayerIdx];
         player.SetGameStatus(_ChooseOtherPlayerStateText);
         player.chosenStateController = null;
