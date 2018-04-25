@@ -37,4 +37,5 @@ public class SwordController : MonoBehaviour {
             swordRenderer.enabled = !glowEnabled;
         }
     }
+
 }
