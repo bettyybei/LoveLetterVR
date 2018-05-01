@@ -10,10 +10,10 @@ public class SwordCollider : MonoBehaviour {
 	}
 
     private void OnTriggerEnter(Collider other) {
-        if (other.tag.Equals("Sword") || other.tag.Equals("Player")) {
-            StartCoroutine(LongVibration(0.3f, 3999));
+        if (other.tag.Equals("Sword")) {
+          StartCoroutine(LongVibration(0.3f, 3999));
         }
-    }
+  }
 
     IEnumerator LongVibration(float length, float strength) {
         for (float i = 0; i < length; i += Time.deltaTime) {

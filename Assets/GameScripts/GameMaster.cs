@@ -210,7 +210,8 @@ public class GameMaster: MonoBehaviour {
     #region Player Coroutines
     IEnumerator ChooseDismiss() {
         PlayerController player = players[currentPlayerIdx];
-        if (player.DismissState == State.Countess && (player.CurrentState == State.Prince || player.CurrentState == State.King)) {
+        if ((player.DismissState == State.Countess && (player.CurrentState == State.Prince || player.CurrentState == State.King)) ||
+            (player.CurrentState == State.Countess && (player.DismissState == State.Prince || player.DismissState == State.King))) {
             // Skip choosing state to dismiss
             player.SetGameStatus("The Countess is dismissed because you have a Prince or King");
         } else {
@@ -252,7 +253,7 @@ public class GameMaster: MonoBehaviour {
                 }
                 break;
             case State.Princess:
-                PlayerDie(player, "You dismissed the Princess and she's very angry. You are out of the round");
+                PlayerDie(player, "You dismissed the Princess and she threw your letter in the fire. You are out!");
                 break;
         }
         player.IsDoingTurn = false;
@@ -295,7 +296,7 @@ public class GameMaster: MonoBehaviour {
         // if the only other player is immune, skip
         int validPlayerCount = 0;
         for (int i = 0; i < players.Length; i++) {
-            if (i != currentPlayerIdx && !players[i].Immune) {
+            if (i != currentPlayerIdx && !players[i].Immune && (players[i].CurrentState != State.Dead)) {
                 validPlayerCount++;
             }
         }

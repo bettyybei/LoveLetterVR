@@ -88,11 +88,11 @@ public class PlayerController : MonoBehaviour, IGlobalTriggerPressDownHandler, I
                 Debug.Log("Pointing at " + otherPlayerController);
                 if (otherPlayerController == null) return;
                 if (otherPlayerController.Immune) {
-                    SetGameStatus(_ChooseAnotherPlayerText + "- that player is immune");
+                    SetGameStatus(_ChooseAnotherPlayerText + "because that player is immune!");
                     return;
                 }
                 if (otherPlayerController.CurrentState == State.Dead) {
-                    SetGameStatus(_ChooseAnotherPlayerText + "- that player is dead");
+                    SetGameStatus(_ChooseAnotherPlayerText + "because that player is out!");
                     return;
                 }
                 if (AllowChooseSelf || otherPlayerController != this) {
