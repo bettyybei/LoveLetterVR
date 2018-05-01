@@ -303,7 +303,7 @@ PlayerSettings:
     m_Enabled: 0
     m_Devices: []
   - m_BuildTarget: Standalone
-    m_Enabled: 1
+    m_Enabled: 0
     m_Devices:
     - OpenVR
   - m_BuildTarget: Tizen
@@ -724,7 +724,7 @@ PlayerSettings:
   facebookSdkVersion: 7.9.4
   apiCompatibilityLevel: 2
   cloudProjectId: 06100362-d77d-4a57-9b50-f058824a2d73
-  projectName: 
+  projectName: LoveLetters
   organizationId: warth
   cloudEnabled: 0
   enableNativePlatformBackendsForNewInputSystem: 0

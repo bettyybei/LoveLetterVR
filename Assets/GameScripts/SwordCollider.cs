@@ -10,7 +10,7 @@ public class SwordCollider : MonoBehaviour {
 	}
 
     private void OnTriggerEnter(Collider other) {
-        if (other.tag.Equals("Sword")) {
+        if (other.tag.Equals("Sword") || other.tag.Equals("Player")) {
             StartCoroutine(LongVibration(0.3f, 3999));
         }
     }

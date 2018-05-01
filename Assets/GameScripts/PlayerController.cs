@@ -23,8 +23,9 @@ public class PlayerController : MonoBehaviour, IGlobalTriggerPressDownHandler, I
     public bool AllowChooseSelf { get; set; }
 
     private string[] statusDelim = new string[] { "\n>>" };
+    const string _ChooseAnotherPlayerText = "Choose another player ";
 
-    void Start() {
+  void Start() {
         InstructionNum = 0;
     }
 
@@ -85,14 +86,17 @@ public class PlayerController : MonoBehaviour, IGlobalTriggerPressDownHandler, I
             if (IsChoosingOtherPlayer) {
                 PlayerController otherPlayerController = eventData.currentRaycast.GetComponent<PlayerController>();
                 Debug.Log("Pointing at " + otherPlayerController);
-                if (otherPlayerController != null && otherPlayerController.Immune) {
-                    SetGameStatus("That player is immune");
+                if (otherPlayerController == null) return;
+                if (otherPlayerController.Immune) {
+                    SetGameStatus(_ChooseAnotherPlayerText + "- that player is immune");
                     return;
                 }
-                if (otherPlayerController != null) {
-                    if (AllowChooseSelf || otherPlayerController != this) {
-                        chosenOtherPlayer = otherPlayerController;
-                    }
+                if (otherPlayerController.CurrentState == State.Dead) {
+                    SetGameStatus(_ChooseAnotherPlayerText + "- that player is dead");
+                    return;
+                }
+                if (AllowChooseSelf || otherPlayerController != this) {
+                    chosenOtherPlayer = otherPlayerController;
                 }
             } else if (IsChoosingOwnState || IsChoosingMenuState) {
 
